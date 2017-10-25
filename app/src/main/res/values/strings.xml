@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Keep</string>
+    <string name="title_checklist">Checklist</string>
+    <string name="title_drawing">Drawing</string>
+    <string name="title_recording">Recording</string>
+    <string name="title_photo">Photo</string>
+    <string name="text_note_button">Take a note...</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_checklist"
+        android:icon="@drawable/ic_checklist_black_24dp"
+        android:title="@string/title_checklist" />
+
+    <item
+        android:id="@+id/navigation_drawing"
+        android:icon="@drawable/ic_drawing_black_24dp"
+        android:title="@string/title_drawing" />
+
+    <item
+        android:id="@+id/navigation_recording"
+        android:icon="@drawable/ic_recording_black_24dp"
+        android:title="@string/title_recording" />
+
+    <item
+        android:id="@+id/navigation_photo"
+        android:icon="@drawable/ic_photo_black_24dp"
+        android:title="@string/title_photo" />
+
+</menu>

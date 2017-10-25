@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="0dp"
+    android:orientation="vertical"
+    tools:context="com.chickendinner.keep.MainActivity">
+
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:elevation="0dp">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="This is a placeholder.  It prints out the name of the button you pressed."
+            android:textSize="30sp" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light"
+        android:elevation="5dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/textNoteButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:background="@android:color/transparent"
+            android:elevation="1dp"
+            android:onClick="makeNote"
+            android:text="@string/text_note_button" />
+
+        <ImageButton
+            android:id="@+id/checklistButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:elevation="1dp"
+            android:onClick="makeNote"
+            app:srcCompat="@drawable/ic_checklist_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/drawingButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:onClick="makeNote"
+            app:srcCompat="@drawable/ic_drawing_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/recordingButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:onClick="makeNote"
+            app:srcCompat="@drawable/ic_recording_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/photoButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:onClick="makeNote"
+            app:srcCompat="@drawable/ic_photo_black_24dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
