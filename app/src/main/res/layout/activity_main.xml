@@ -17,10 +17,9 @@
         android:elevation="0dp">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/textMessage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="This is a placeholder.  It prints out the name of the button you pressed."
             android:textSize="30sp" />
     </FrameLayout>
 

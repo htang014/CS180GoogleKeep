@@ -16,19 +16,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mTextMessage = (TextView) findViewById(R.id.textMessage);
+        mTextMessage.setText("This is a placeholder.  Click a button to display text.");
     }
 
     public void makeNote(View view) {
         switch (view.getId()) {
             case R.id.textNoteButton:
+                mTextMessage.setText("text note");
                 break;
             case R.id.checklistButton:
+                mTextMessage.setText("checklist");
                 break;
             case R.id.drawingButton:
+                mTextMessage.setText("drawing");
                 break;
             case R.id.recordingButton:
+                mTextMessage.setText("recording");
                 break;
             case R.id.photoButton:
+                mTextMessage.setText("photo");
                 break;
 
         }
