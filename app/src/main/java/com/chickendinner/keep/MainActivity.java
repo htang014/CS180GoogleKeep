@@ -1,5 +1,6 @@
 package com.chickendinner.keep;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -21,9 +22,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void makeNote(View view) {
+        Intent intent = null;
         switch (view.getId()) {
             case R.id.textNoteButton:
                 mTextMessage.setText("text note");
+                intent = new Intent(this, TextNoteActivity.class);
                 break;
             case R.id.checklistButton:
                 mTextMessage.setText("checklist");
@@ -39,5 +42,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
         }
+        startActivity(intent);
     }
 }
