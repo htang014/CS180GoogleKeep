@@ -33,6 +33,7 @@ proguard/
 captures/
 
 # Intellij
+app/app.iml
 *.iml
 .idea/
 /.gradle
