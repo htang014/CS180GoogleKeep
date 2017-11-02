@@ -2,10 +2,7 @@ package com.chickendinner.keep;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.widget.TextView;
 import android.view.View;
 
@@ -30,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.checklistButton:
                 mTextMessage.setText("checklist");
+                intent = new Intent(this, ChecklistActivity.class);
                 break;
             case R.id.drawingButton:
                 mTextMessage.setText("drawing");

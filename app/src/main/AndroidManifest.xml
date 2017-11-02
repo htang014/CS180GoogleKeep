@@ -19,11 +19,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".TextNoteActivity"
             android:label="@string/title_activity_text_note"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize"></activity>
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ChecklistActivity"
+            android:label="@string/title_activity_checklist_note"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"/>
+
     </application>
 
 </manifest>
