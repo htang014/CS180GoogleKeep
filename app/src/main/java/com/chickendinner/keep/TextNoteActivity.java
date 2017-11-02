@@ -12,22 +12,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 
-public class TextNoteActivity extends AppCompatActivity {
-
-    private TextView mEditTime;
-    private Calendar cal;
+public class TextNoteActivity extends NoteActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_text_note);
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
         mEditTime = (TextView) findViewById(R.id.editTime);
         cal = Calendar.getInstance();
         updateTime();
     }
 
+    @Override
     public void reactToClick(View view){
         switch (view.getId()) {
             case R.id.textNoteTitle:
@@ -38,15 +34,5 @@ public class TextNoteActivity extends AppCompatActivity {
                 finish();
         }
     }
-
-    public void updateTime(){
-        int hour = cal.get(Calendar.HOUR_OF_DAY);
-        int min = cal.get(Calendar.MINUTE);
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        String aux = String.format("Edited %s", sdf.format(cal.getTime()));
-        mEditTime.setText(aux);
-    }
-
-
 
 }
