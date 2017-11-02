@@ -25,6 +25,18 @@ public class ChecklistActivity extends NoteActivity {
     }
 
     public void reactToClick(View view){
-        mRecyclerListFragment.addItem();
+        switch (view.getId()){
+            case R.id.textNoteTitle:
+            case R.id.checklistFragment:
+                updateTime();
+                break;
+            case R.id.backButton:
+                finish();
+                break;
+            case R.id.addItemButton:
+                mRecyclerListFragment.addItem();
+                break;
+        }
+
     }
 }

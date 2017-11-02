@@ -15,10 +15,9 @@ public class NoteActivity extends AppCompatActivity {
     public void reactToClick(View view){}
 
     public void updateTime(){
-        int hour = cal.get(Calendar.HOUR_OF_DAY);
-        int min = cal.get(Calendar.MINUTE);
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        String aux = String.format("Edited %s", sdf.format(cal.getTime()));
+        SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
+        String aux = String.format("Edited %s at %s", sdf.format(cal.getTime()), stf.format(cal.getTime()));
         mEditTime.setText(aux);
     }
 }
