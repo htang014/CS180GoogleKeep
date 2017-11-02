@@ -61,13 +61,18 @@
                     android:paddingTop="20dp"
                     android:scrollHorizontally="false"
                     android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"/>
 
                 <fragment
                     android:id="@+id/checklistFragment"
                     android:name="com.chickendinner.keep.recycler.RecyclerListFragment"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:onClick="reactToClick"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"/>
 
                 <Button
                     android:id="@+id/addItemButton"

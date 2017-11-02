@@ -27,11 +27,12 @@ public class TextNoteActivity extends NoteActivity {
     public void reactToClick(View view){
         switch (view.getId()) {
             case R.id.textNoteTitle:
-            case R.id.textNoteBody:
+            case R.id.checklistFragment:
                 updateTime();
                 break;
             case R.id.backButton:
                 finish();
+                break;
         }
     }
 
