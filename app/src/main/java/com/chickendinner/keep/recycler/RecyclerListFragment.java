@@ -8,6 +8,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import com.chickendinner.keep.R;
 import com.chickendinner.keep.itemTouchHelper.ItemTouchHelperAdapter;
@@ -16,6 +17,7 @@ import com.chickendinner.keep.itemTouchHelper.OnStartDragListener;
 import com.chickendinner.keep.recycler.RecyclerListAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecyclerListFragment extends Fragment implements
         OnStartDragListener {
@@ -23,6 +25,8 @@ public class RecyclerListFragment extends Fragment implements
     private RecyclerView.Adapter mRecyclerAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<String> mDataset;
+    private ArrayList<CheckBox> mCheckList;
+
 
     private ItemTouchHelper mItemTouchHelper;
     private ItemTouchHelper.Callback mItemTouchCallback;
@@ -32,6 +36,7 @@ public class RecyclerListFragment extends Fragment implements
                              Bundle savedInstanceState) {
         mDataset = new ArrayList<String>();
         // Inflate the layout for this fragment
+        mCheckList = new ArrayList<CheckBox>();
         return inflater.inflate(R.layout.fragment_recycler_list, container, false);
     }
 
@@ -39,7 +44,7 @@ public class RecyclerListFragment extends Fragment implements
     public void onViewCreated(View view, Bundle icicle) {
         super.onViewCreated(view, icicle);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        mRecyclerAdapter = new RecyclerListAdapter(this, mDataset);
+        mRecyclerAdapter = new RecyclerListAdapter(this, mDataset, mCheckList);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -48,14 +53,26 @@ public class RecyclerListFragment extends Fragment implements
         mItemTouchHelper = new ItemTouchHelper(mItemTouchCallback);
         mItemTouchHelper.attachToRecyclerView(mRecyclerView);
     }
+
     @Override
     public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
         mItemTouchHelper.startDrag(viewHolder);
     }
 
     // Externally used to push to RecyclerView
-    public void addItem(){
+    public void addItem() {
         mDataset.add("");
         mRecyclerAdapter.notifyDataSetChanged();
     }
+
+    public List<String> getStringData() {
+        return mDataset;
+    }
+
+    public List<CheckBox> getCheckList() {
+        return mCheckList;
+    }
+
+
+
 }

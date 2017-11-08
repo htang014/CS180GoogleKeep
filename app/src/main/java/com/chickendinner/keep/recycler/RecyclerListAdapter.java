@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,6 +21,7 @@ import java.util.List;
 public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapter.ViewHolder>
         implements ItemTouchHelperAdapter {
     private List<String> mDataset;
+    private List<CheckBox> mCheckmCheck;
     private final OnStartDragListener mDragStartListener;
 
     // Provide a reference to the views for each data item
@@ -34,9 +36,10 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     }
 
     // Constructor
-    public RecyclerListAdapter(OnStartDragListener dragStartListener, List<String> initData) {
+    public RecyclerListAdapter(OnStartDragListener dragStartListener, List<String> initData, List<CheckBox> initCheck) {
         mDragStartListener = dragStartListener;
         mDataset = initData;
+        mCheckmCheck = initCheck;
     }
 
     // Create new views (invoked by the layout manager)
@@ -55,6 +58,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
     @Override
     public void onBindViewHolder(final RecyclerListAdapter.ViewHolder holder, int position) {
         // Initialize EditText contents to string added to dataset.  Does nothing currently.
+        mCheckmCheck.add((CheckBox) holder.mChecklistItem.getChildAt(1));
         EditText t = (EditText) holder.mChecklistItem.getChildAt(2);
         t.setText(mDataset.get(mDataset.size()-1));
 
