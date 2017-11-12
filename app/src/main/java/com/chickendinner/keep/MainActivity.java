@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.drawingButton:
                 mTextMessage.setText("drawing");
+                intent = new Intent(this, DrawingActivity.class);
                 break;
             case R.id.recordingButton:
                 mTextMessage.setText("recording");
