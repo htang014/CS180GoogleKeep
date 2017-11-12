@@ -31,7 +31,7 @@ public class DrawingActivity extends NoteActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_drawing);
 
         // 初始化一个画笔，笔触宽度为5，颜色为红色
         paint = new Paint();
