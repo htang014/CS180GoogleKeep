@@ -29,8 +29,6 @@ public class ChecklistActivity extends NoteActivity {
 
     //Todo add database part here
     protected void saveDataToDB() {
-        List<String> mData = mRecyclerListFragment.getStringData();
-        List<CheckBox> mCheck = mRecyclerListFragment.getCheckList();
     }
 
     public void reactToClick(View view){
