@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:onClick="reactToClick"
+                android:onClick="onClick"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 app:srcCompat="@drawable/ic_backarrow_black_24dp" />
@@ -54,7 +54,7 @@
                     android:ems="10"
                     android:hint="Title"
                     android:inputType="textMultiLine|textPersonName"
-                    android:onClick="reactToClick"
+                    android:onClick="onClick"
                     android:paddingBottom="20dp"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"
@@ -70,7 +70,7 @@
                     android:name="com.chickendinner.keep.recycler.RecyclerListFragment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:onClick="reactToClick"
+                    android:onClick="onClick"
                     android:focusable="true"
                     android:focusableInTouchMode="true"/>
 
@@ -79,7 +79,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
-                    android:onClick="reactToClick"
+                    android:onClick="onClick"
                     android:paddingLeft="40dp"
                     android:text="+ New Item"
                     android:textAlignment="viewStart"
