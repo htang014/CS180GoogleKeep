@@ -1,166 +1,228 @@
 package com.chickendinner.keep;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.view.MotionEvent;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
-import com.chickendinner.keep.workbox.PathView;
 
-public class DrawingActivity extends NoteActivity {
-    private ImageButton backButton, undoButton, redoButton, deleteButton, cropButton, drawButton, eraseButton;
-    private ImageView iv_canvas;
-    private Bitmap baseBitmap;
-    private Canvas canvas;
-    private Paint paint;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class DrawingActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback {
+
+    private View mUndoView;
+    private View mRedoView;
+    private View mPenView;
+    private View mEraserView;
+    private View mClearView;
+    private PaletteView mPaletteView;
+    private ProgressDialog mSaveProgressDlg;
+    private static final int MSG_SAVE_SUCCESS = 1;
+    private static final int MSG_SAVE_FAILED = 2;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawing);
 
-        // 初始化一个画笔，笔触宽度为5，颜色为红色
-        paint = new Paint();
-        paint.setStrokeWidth(5);
-        paint.setColor(Color.RED);
+        mPaletteView = (PaletteView) findViewById(R.id.palette);
+        mPaletteView.setCallback(this);
 
-        iv_canvas = (ImageView) findViewById(R.id.iv_canvas);
-        backButton = (ImageButton) findViewById(R.id.backButton);
-        undoButton = (ImageButton) findViewById(R.id.undoButton);
-        redoButton = (ImageButton) findViewById(R.id.redoButton);
-        deleteButton = (ImageButton) findViewById(R.id.deleteButton);
-        cropButton = (ImageButton) findViewById(R.id.cropButton);
-        drawButton = (ImageButton) findViewById(R.id.drawButton);
-        eraseButton = (ImageButton) findViewById(R.id.eraseButton);
+        mUndoView = findViewById(R.id.undo);
+        mRedoView = findViewById(R.id.redo);
+        mPenView = findViewById(R.id.pen);
+        mPenView.setSelected(true);
+        mEraserView = findViewById(R.id.eraser);
+        mClearView = findViewById(R.id.clear);
 
-        backButton.setOnClickListener(click);
-        undoButton.setOnClickListener(click);
-        redoButton.setOnClickListener(click);
-        deleteButton.setOnClickListener(click);
-        cropButton.setOnClickListener(click);
-        drawButton.setOnClickListener(click);
-        eraseButton.setOnClickListener(click);
-        iv_canvas.setOnTouchListener(touch);
+        ImageButton sava = (ImageButton) findViewById(R.id.saveButton);
+        ImageButton back = (ImageButton) findViewById(R.id.backButton);
+
+        mUndoView.setOnClickListener(this);
+        mRedoView.setOnClickListener(this);
+        mPenView.setOnClickListener(this);
+        mEraserView.setOnClickListener(this);
+        mClearView.setOnClickListener(this);
+
+
+        mUndoView.setEnabled(false);
+        mRedoView.setEnabled(false);
+
+        mHandler = new Handler(this);
     }
 
-    private View.OnTouchListener touch = new OnTouchListener() {
-        // 定义手指开始触摸的坐标
-        float startX;
-        float startY;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandler.removeMessages(MSG_SAVE_FAILED);
+        mHandler.removeMessages(MSG_SAVE_SUCCESS);
+    }
 
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                // 用户按下动作
-                case MotionEvent.ACTION_DOWN:
-                    // 第一次绘图初始化内存图片，指定背景为白色
-                    if (baseBitmap == null) {
-                        baseBitmap = Bitmap.createBitmap(iv_canvas.getWidth(),
-                                iv_canvas.getHeight(), Bitmap.Config.ARGB_8888);
-                        canvas = new Canvas(baseBitmap);
-                        canvas.drawColor(Color.WHITE);
+    private void initSaveProgressDlg(){
+        mSaveProgressDlg = new ProgressDialog(this);
+        mSaveProgressDlg.setMessage("正在保存,请稍候...");
+        mSaveProgressDlg.setCancelable(false);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean handleMessage(Message msg) {
+        switch (msg.what){
+            case MSG_SAVE_FAILED:
+                mSaveProgressDlg.dismiss();
+                Toast.makeText(this,"保存失败",Toast.LENGTH_SHORT).show();
+                break;
+            case MSG_SAVE_SUCCESS:
+                mSaveProgressDlg.dismiss();
+                Toast.makeText(this,"画板已保存",Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return true;
+    }
+
+    private static void scanFile(Context context, String filePath) {
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(filePath)));
+        context.sendBroadcast(scanIntent);
+    }
+
+    private static String saveImage(Bitmap bmp, int quality) {
+        if (bmp == null) {
+            return null;
+        }
+        File appDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        if (appDir == null) {
+            return null;
+        }
+        String fileName = System.currentTimeMillis() + ".jpg";
+        File file = new File(appDir, fileName);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+            bmp.compress(Bitmap.CompressFormat.JPEG, quality, fos);
+            fos.flush();
+            return file.getAbsolutePath();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.save:
+                if(mSaveProgressDlg==null){
+                    initSaveProgressDlg();
+                }
+                mSaveProgressDlg.show();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Bitmap bm = mPaletteView.buildBitmap();
+                        String savedFile = saveImage(bm, 100);
+                        if (savedFile != null) {
+                            scanFile(DrawingActivity.this, savedFile);
+                            mHandler.obtainMessage(MSG_SAVE_SUCCESS).sendToTarget();
+                        }else{
+                            mHandler.obtainMessage(MSG_SAVE_FAILED).sendToTarget();
+                        }
                     }
-                    // 记录开始触摸的点的坐标
-                    startX = event.getX();
-                    startY = event.getY();
-                    break;
-                // 用户手指在屏幕上移动的动作
-                case MotionEvent.ACTION_MOVE:
-                    // 记录移动位置的点的坐标
-                    float stopX = event.getX();
-                    float stopY = event.getY();
-
-                    //根据两点坐标，绘制连线
-                    canvas.drawLine(startX, startY, stopX, stopY, paint);
-
-                    // 更新开始点的位置
-                    startX = event.getX();
-                    startY = event.getY();
-
-                    // 把图片展示到ImageView中
-                    iv_canvas.setImageBitmap(baseBitmap);
-                    break;
-                case MotionEvent.ACTION_UP:
-
-                    break;
-                default:
-                    break;
-            }
-            return true;
+                }).start();
+                break;
         }
-    };
-    private View.OnClickListener click = new OnClickListener() {
+        return true;
+    }
 
-        @Override
-        public void onClick(View v) {
+    @Override
+    public void onUndoRedoStatusChanged() {
+        mUndoView.setEnabled(mPaletteView.canUndo());
+        mRedoView.setEnabled(mPaletteView.canRedo());
+    }
 
-            switch (v.getId()) {
-                case R.id.backButton:
-                    finish();
-                    break;
-                case R.id.undoButton:
-                    break;
-                case R.id.redoButton:
-                    break;
-                case R.id.deleteButton:
-                    resumeCanvas();
-                    break;
-                default:
-                    break;
-            }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.undo:
+                mPaletteView.undo();
+                break;
+            case R.id.redo:
+                mPaletteView.redo();
+                break;
+            case R.id.pen:
+                v.setSelected(true);
+                mEraserView.setSelected(false);
+                mPaletteView.setMode(PaletteView.Mode.DRAW);
+                break;
+            case R.id.eraser:
+                v.setSelected(true);
+                mPenView.setSelected(false);
+                mPaletteView.setMode(PaletteView.Mode.ERASER);
+                break;
+            case R.id.clear:
+                mPaletteView.clear();
+                break;
         }
-    };
-
-    /**
-     * 保存图片到SD卡上
-     */
-//    protected void saveBitmap() {
-//        try {
-//            // 保存图片到SD卡上
-//            File file = new File(Environment.getExternalStorageDirectory(),
-//                    System.currentTimeMillis() + ".png");
-//            FileOutputStream stream = new FileOutputStream(file);
-//            baseBitmap.compress(CompressFormat.PNG, 100, stream);
-//            Toast.makeText(DrawingActivity.this, "保存图片成功", 0).show();
-//
-//            // Android设备Gallery应用只会在启动的时候扫描系统文件夹
-//            // 这里模拟一个媒体装载的广播，用于使保存的图片可以在Gallery中查看
-//            Intent intent = new Intent();
-//            intent.setAction(Intent.ACTION_MEDIA_MOUNTED);
-//            intent.setData(Uri.fromFile(Environment
-//                    .getExternalStorageDirectory()));
-//            sendBroadcast(intent);
-//        } catch (Exception e) {
-//            Toast.makeText(DrawingActivity.this, "保存图片失败", 0).show();
-//            e.printStackTrace();
-//        }
-//    }
-
-    /**
-     * 清除画板
-     */
-    protected void resumeCanvas() {
-        // 手动清除画板的绘图，重新创建一个画板
-        if (baseBitmap != null) {
-            baseBitmap = Bitmap.createBitmap(iv_canvas.getWidth(), iv_canvas.getHeight(), Bitmap.Config.ARGB_8888);
-            canvas = new Canvas(baseBitmap);
-            canvas.drawColor(Color.WHITE);
-            iv_canvas.setImageBitmap(baseBitmap);
-            //Toast.makeText(DrawingActivity.this, "清除画板成功，可以重新开始绘图", 0).show();
+    }
+    public void reactToClick(View view){
+        switch (view.getId()) {
+            case R.id.backButton:
+                finish();
+                break;
+            case R.id.saveButton:
+                try{
+                    saveBitmapToSDCard();
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+                break;
         }
+    }
+    private void saveBitmapToSDCard() throws IOException{
+
+        Bitmap bmp = mPaletteView.buildBitmap();
+
+        File parent_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File f = new File(parent_path.getAbsoluteFile(), "Picture.png");
+        f.createNewFile();
+        Log.d("saving_path", f.getAbsolutePath());
+        FileOutputStream fos = new FileOutputStream(f);
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        fos.flush();
+        fos.close();
+
+        Toast.makeText(getApplicationContext(), "saving complete :" + f.getAbsolutePath(), Toast.LENGTH_LONG).show();
     }
 }
