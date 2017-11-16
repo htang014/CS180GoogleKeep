@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.chickendinner.keep.DrawingActivity">
+
+    <item android:id="@+id/save" app:showAsAction="always"
+        android:icon="@drawable/ic_action_save"
+        android:titleCondensed="save"
+        android:title="save"
+    />
+
+</menu> 

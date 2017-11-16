@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.chickendinner.keep.TextNoteActivity">
-
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -19,118 +12,87 @@
             android:elevation="5dp"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/backButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="reactToClick"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                app:srcCompat="@drawable/ic_backarrow_black_24dp" />
+                <ImageButton
+                    android:id="@+id/backButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:onClick="reactToClick"
+                    android:paddingBottom="15dp"
+                    android:paddingTop="15dp"
+                    app:srcCompat="@drawable/ic_backarrow_black_24dp" />
 
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="10" />
-
-            <ImageButton
-                android:id="@+id/undoButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="reactToClick"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                app:srcCompat="@drawable/ic_action_undo" />
-
-            <ImageButton
-                android:id="@+id/redoButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="reactToClick"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                app:srcCompat="@drawable/ic_action_redo" />
-
-            <ImageButton
-                android:id="@+id/deleteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="reactToClick"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                app:srcCompat="@drawable/ic_delete" />
-        </LinearLayout>
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="10" />
 
                 <ImageView
-                    android:id="@+id/iv_canvas"
-                    android:layout_width="match_parent"
+                    android:id="@+id/undo"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    app:srcCompat="@android:color/transparent" />
-            </LinearLayout>
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_action_undo" />
 
-        </ScrollView>
+                <ImageView
+                    android:id="@+id/redo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_action_redo" />
+
+                <ImageButton
+                    android:id="@+id/saveButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_action_save"
+                    android:background="@android:color/transparent"/>
+        </LinearLayout>
+
+        <com.chickendinner.keep.PaletteView
+            android:id="@+id/palette"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/background_light" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/background_light"
-            android:elevation="5dp"
+            android:layout_height="56dp"
+            android:gravity="center"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/cropButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="reactToClick"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                app:srcCompat="@drawable/ic_action_crop" />
+                <ImageView
+                    android:id="@+id/pen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_drawing_black_24dp" />
 
-            <ImageButton
-                android:id="@+id/eraseButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="reactToClick"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                app:srcCompat="@drawable/ic_action_erase" />
+                <ImageView
+                    android:id="@+id/eraser"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_action_erase" />
 
-            <ImageButton
-                android:id="@+id/drawButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="reactToClick"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                app:srcCompat="@drawable/ic_drawing_black_24dp" />
-
-
+                <ImageView
+                    android:id="@+id/clear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_delete" />
         </LinearLayout>
-
-    </LinearLayout>
-
-</android.support.design.widget.CoordinatorLayout>
+</LinearLayout>

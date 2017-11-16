@@ -12,4 +12,15 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_drawing">DrawingActivity</string>
+
+    <string name="menu1">画笔宽度</string>
+    <string name="menu1_sub1">1</string>
+    <string name="menu1_sub2">5</string>
+    <string name="menu1_sub3">10</string>
+    <string name="menu1_sub4">50</string>
+    <string name="menu2">画笔</string>
+    <string name="menu3">橡皮擦</string>
+    <string name="menu4">保存</string>
+    <string name="menu5">退出</string>
+    <string name="menu_author">作者：yongh701</string>
 </resources>
