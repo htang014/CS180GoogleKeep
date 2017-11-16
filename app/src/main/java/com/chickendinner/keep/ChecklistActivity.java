@@ -31,7 +31,7 @@ public class ChecklistActivity extends NoteActivity {
     protected void saveDataToDB() {
     }
 
-    public void reactToClick(View view){
+    public void onClick(View view){
         switch (view.getId()){
             case R.id.textNoteTitle:
             case R.id.checklistFragment:
