@@ -21,6 +21,14 @@ public class RecyclerListFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<CheckListBean> mDataset;
 
+    public ArrayList<CheckListBean> getmDataset() {
+        return mDataset;
+    }
+
+    public void setmDataset(ArrayList<CheckListBean> mDataset) {
+        this.mDataset = mDataset;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
