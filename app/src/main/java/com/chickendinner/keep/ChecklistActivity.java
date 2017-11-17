@@ -4,9 +4,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.chickendinner.keep.recycler.CheckListBean;
 import com.chickendinner.keep.recycler.RecyclerListFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,6 +18,7 @@ import java.util.List;
 
 public class ChecklistActivity extends NoteActivity {
     RecyclerListFragment mRecyclerListFragment;
+    private String noteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,10 +30,21 @@ public class ChecklistActivity extends NoteActivity {
         mEditTime = (TextView) findViewById(R.id.editTime);
         cal = Calendar.getInstance();
         updateTime();
+
+        mAuth = FirebaseAuth.getInstance();
+        uid = mAuth.getUid();
+        mDatabase = FirebaseDatabase.getInstance();
+        mReference = mDatabase.getReference("users").child(uid);
+        noteId = "000000000000000000";
     }
 
     //Todo add database part here
     protected void saveDataToDB() {
+        EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+        List<CheckListBean> data = mRecyclerListFragment.getStringAndCheckData();
+        mReference.child(noteId).child("type").setValue("1");
+        mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
+        mReference.child(noteId).child("data").setValue(data);
     }
 
     public void onClick(View view){
