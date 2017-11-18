@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
     }
 
@@ -68,14 +67,11 @@ public class MainActivity extends AppCompatActivity {
                 mTextMessage.setText("drawing");
                 intent = new Intent(this, DrawingActivity.class);
                 break;
-            case R.id.recordingButton:
-                mTextMessage.setText("recording");
-                break;
             case R.id.photoButton:
                 mTextMessage.setText("photo");
                 intent = new Intent(this, PhotoNoteActivity.class);
+                startActivity(intent);
                 break;
-
         }
         startActivity(intent);
     }

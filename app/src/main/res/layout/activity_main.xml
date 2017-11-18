@@ -72,16 +72,6 @@
             app:srcCompat="@drawable/ic_drawing_black_24dp" />
 
         <ImageButton
-            android:id="@+id/recordingButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:onClick="makeNote"
-            app:srcCompat="@drawable/ic_recording_black_24dp" />
-
-        <ImageButton
             android:id="@+id/photoButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
