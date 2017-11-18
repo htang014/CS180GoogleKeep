@@ -35,7 +35,7 @@ public class ChecklistActivity extends NoteActivity {
         uid = mAuth.getUid();
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
-        noteId = "000000000000000000";
+        noteId = mNoteIdGenerator.generateNoteId();
     }
 
     //Todo add database part here

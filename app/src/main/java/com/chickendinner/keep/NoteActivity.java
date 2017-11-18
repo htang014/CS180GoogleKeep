@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.chickendinner.keep.Tools.NoteIdGenerator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -16,6 +17,7 @@ public class NoteActivity extends AppCompatActivity {
     protected DatabaseReference mReference;
     protected FirebaseAuth mAuth;
     protected String uid;
+    protected NoteIdGenerator mNoteIdGenerator = new NoteIdGenerator();
 
     protected TextView mEditTime;
     protected Calendar cal;
