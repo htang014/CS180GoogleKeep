@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.photoButton:
                 mTextMessage.setText("photo");
+                intent = new Intent(this, PhotoNoteActivity.class);
                 break;
 
         }
