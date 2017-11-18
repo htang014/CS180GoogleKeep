@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.chickendinner.keep.PhotoNoteActivity">
+    tools:context="com.chickendinner.keep.TextNoteActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -19,14 +19,6 @@
             android:elevation="5dp"
             android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_centerInParent="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="visible"
-                android:layout_marginBottom="30dp" />
-
             <ImageButton
                 android:id="@+id/backButton"
                 android:layout_width="wrap_content"
@@ -38,6 +30,11 @@
                 android:paddingTop="15dp"
                 app:srcCompat="@drawable/ic_backarrow_black_24dp" />
 
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="10" />
+
             <ImageButton
                 android:id="@+id/StartCameraFull"
                 android:layout_width="wrap_content"
@@ -48,11 +45,6 @@
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 app:srcCompat="@drawable/ic_photo_black_24dp" />
-
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="10" />
 
         </LinearLayout>
 
@@ -66,13 +58,23 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="331dp"
+                    android:layout_centerInParent="true"
+                    android:layout_marginBottom="30dp"
+                    android:visibility="visible" android:contentDescription="TODO"/>
+
                 <EditText
-                    android:id="@+id/PhotoNoteTitle"
+                    android:id="@+id/textNoteTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.1"
                     android:background="@android:color/transparent"
                     android:ems="10"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:hint="Title"
                     android:inputType="textMultiLine|textPersonName"
                     android:onClick="onClick"
@@ -82,17 +84,17 @@
                     android:paddingTop="20dp"
                     android:scrollHorizontally="false"
                     android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"/>
+                    android:textStyle="bold" />
 
                 <EditText
-                    android:id="@+id/PhotoNoteBody"
+                    android:id="@+id/textNoteBody"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.1"
                     android:background="@android:color/transparent"
                     android:ems="10"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:gravity="top|center_vertical"
                     android:hint="Note"
                     android:inputType="text|textMultiLine"
@@ -100,9 +102,7 @@
                     android:paddingBottom="20dp"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"
-                    android:scrollHorizontally="false"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"/>
+                    android:scrollHorizontally="false" />
             </LinearLayout>
         </ScrollView>
 
@@ -126,4 +126,4 @@
 
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</android.support.design.widget.CoordinatorLayout>

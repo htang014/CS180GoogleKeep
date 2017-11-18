@@ -25,7 +25,6 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
     private File photoFile;
 
     //requestCode
-    private static final int REQUEST_IMAGE_CAPTURE_THUMB = 1;
     private static final int REQUEST_IMAGE_CAPTURE_FULL = 2;
 
     private static final String JPEG_FILE_PREFIX = "IMG_";
@@ -73,7 +72,8 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
 
     }
 
-    private File createFile() throws IOException {
+    private File createFile() throws IOException
+    {
         photoFile = null;
 
         String fileName;
@@ -86,7 +86,8 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
         return photoFile;
     }
 
-    private void initView() {
+    private void initView()
+    {
         mImageView = (ImageView) findViewById(R.id.imageView);
 
         StartCameraFull = (ImageButton) findViewById(R.id.photoButton);
@@ -100,8 +101,8 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
 
 
     @Override
-    public void onClick(View view) {
-
+    public void onClick(View view)
+    {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         switch (view.getId()){
             case R.id.StartCameraFull:
@@ -118,27 +119,14 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
         mImageView.setImageBitmap(null);
 
         switch (requestCode){
-            case REQUEST_IMAGE_CAPTURE_THUMB:
-                if(resultCode == RESULT_OK){
-                    Bundle extras = data.getExtras();
-                    Bitmap imageBitmap = (Bitmap) extras.get("data");
-
-                    mImageView.setImageBitmap(imageBitmap);
-                }
-
-                break;
             case REQUEST_IMAGE_CAPTURE_FULL:
                 if(resultCode == RESULT_OK){
                     setPic();
                     galleryAddPic();
                 }
-
                 break;
-
         }
-
     }
-
 
     private void setPic() {
 
