@@ -15,19 +15,22 @@ import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 
-public class PhotoNoteActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener
+public class PhotoNoteActivity extends NoteActivity implements View.OnClickListener, View.OnFocusChangeListener
 {
 
     private EditText mTextNoteTitle;
-    protected DatabaseReference mReference;
+    private String noteId;
 
     private ImageView mImageView;
     private ImageButton StartCameraBtn;
@@ -39,7 +42,7 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
     private static final String JPEG_FILE_PREFIX = "IMG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
 
-    private static final String albumName = "Camera";
+    private static final String albumName = "KeepAlbum";
 
     //int targetW;
     //int targetH;
@@ -52,6 +55,15 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
 
         mTextNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         mImageView = (ImageView) findViewById(R.id.imageView);
+
+        cal = Calendar.getInstance();
+        updateTime();
+
+        mAuth = FirebaseAuth.getInstance();
+        uid = mAuth.getUid();
+        mDatabase = FirebaseDatabase.getInstance();
+        mReference = mDatabase.getReference("users").child(uid);
+        noteId = mNoteIdGenerator.generateNoteId();
 
         //targetW = mImageView.getWidth();
         //targetH = mImageView.getHeight();
