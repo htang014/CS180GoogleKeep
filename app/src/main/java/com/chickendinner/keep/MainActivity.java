@@ -3,17 +3,23 @@ package com.chickendinner.keep;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.view.View;
 
+import com.chickendinner.keep.prevew.PreviewRecyclerViewAdapter;
+
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_INFO = "com.chickendinner.keep.MESSAGE";
 
-    private TextView mTextMessage;
+//    private TextView mTextMessage;
     private Toolbar mToolbar;
+
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,10 +29,17 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-        mTextMessage = (TextView) findViewById(R.id.textMessage);
-        mTextMessage.setText("This is a placeholder.  Click a button to display text.");
+//        mTextMessage = (TextView) findViewById(R.id.textMessage);
+//        mTextMessage.setText("This is a placeholder.  Click a button to display text.");
 
         signInWithGoogle();
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.preview_list);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        mRecyclerView.setAdapter(new PreviewRecyclerViewAdapter());
+
     }
 
     @Override
@@ -56,19 +69,19 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = null;
         switch (view.getId()) {
             case R.id.textNoteButton:
-                mTextMessage.setText("text note");
+//                mTextMessage.setText("text note");
                 intent = new Intent(this, TextNoteActivity.class);
                 break;
             case R.id.checklistButton:
-                mTextMessage.setText("checklist");
+//                mTextMessage.setText("checklist");
                 intent = new Intent(this, ChecklistActivity.class);
                 break;
             case R.id.drawingButton:
-                mTextMessage.setText("drawing");
+//                mTextMessage.setText("drawing");
                 intent = new Intent(this, DrawingActivity.class);
                 break;
             case R.id.photoButton:
-                mTextMessage.setText("photo");
+//                mTextMessage.setText("photo");
                 intent = new Intent(this, PhotoNoteActivity.class);
                 break;
         }
