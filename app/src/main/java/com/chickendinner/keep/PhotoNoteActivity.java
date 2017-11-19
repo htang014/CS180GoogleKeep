@@ -12,6 +12,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import com.google.firebase.database.DatabaseReference;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,8 +23,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class PhotoNoteActivity extends AppCompatActivity implements View.OnClickListener
+public class PhotoNoteActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener
 {
+
+    private EditText mTextNoteTitle;
+    protected DatabaseReference mReference;
 
     private ImageView mImageView;
     private ImageButton StartCameraBtn;
@@ -34,17 +41,20 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
 
     private static final String albumName = "Camera";
 
-    int targetW;
-    int targetH;
+    //int targetW;
+    //int targetH;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_note);
 
+        mTextNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         mImageView = (ImageView) findViewById(R.id.imageView);
-        targetW = mImageView.getWidth();
-        targetH = mImageView.getHeight();
+
+        //targetW = mImageView.getWidth();
+        //targetH = mImageView.getHeight();
 
         StartCameraBtn = (ImageButton) findViewById(R.id.StartCamera);
 
@@ -60,8 +70,20 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        if (!hasFocus) {
+            String saveText;
+            if (view == mTextNoteTitle) {
+                saveText = mTextNoteTitle.getText().toString();
+                mReference.child("title").setValue(saveText);
+            }
+        }
+    }
+
+    @Override
     public void onClick(View view)
     {
+        clearAllFocus();
         switch (view.getId())
         {
             case R.id.StartCamera:
@@ -72,10 +94,25 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
                 break;
 
+            case R.id.textNoteTitle:
+
+            case R.id.clear:
+                mImageView.setImageBitmap(null);
+                break;
+
+            case R.id.save:
+                finish();
+                break;
+
             case R.id.backButton:
                 finish();
                 break;
         }
+    }
+
+    private void clearAllFocus()
+    {
+        mTextNoteTitle.clearFocus();
     }
 
     @Override
@@ -88,14 +125,39 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK)
                 {
-                    setPic();
+
+                    /*BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                    bmOptions.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(photoFile.getAbsolutePath(), bmOptions);
+
+                    int photoW = bmOptions.outWidth;
+                    int photoH = bmOptions.outHeight;
+
+
+                    int scaleFactor = 1;
+                    if ((targetW > 0) || (targetH > 0)) {
+                        scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+                    }
+
+                    bmOptions.inJustDecodeBounds = false;
+                    bmOptions.inSampleSize = scaleFactor;
+                    bmOptions.inPurgeable = true;
+
+                    Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath(), bmOptions);
+
+                    mImageView.setImageBitmap(bitmap);*/
+
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    mImageView.setImageBitmap(photo);
+
                     galleryAddPic();
                 }
                 break;
         }
     }
 
-    private File getPhotoDir() {
+    private File getPhotoDir()
+    {
         File storDirPublic = null;
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
@@ -118,7 +180,8 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
 
     }
 
-    private File createFile() throws IOException {
+    private File createFile() throws IOException
+    {
         photoFile = null;
 
         String fileName;
@@ -131,33 +194,8 @@ public class PhotoNoteActivity extends AppCompatActivity implements View.OnClick
         return photoFile;
     }
 
-    private void setPic() {
-
-
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(photoFile.getAbsolutePath(), bmOptions);
-
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-
-        int scaleFactor = 1;
-        if ((targetW > 0) || (targetH > 0)) {
-            scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-        }
-
-
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath(), bmOptions);
-
-        mImageView.setImageBitmap(bitmap);
-    }
-
-    private void galleryAddPic() {
+    private void galleryAddPic()
+    {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         Uri contentUri = Uri.fromFile(photoFile);
         mediaScanIntent.setData(contentUri);

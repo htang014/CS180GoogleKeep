@@ -47,6 +47,8 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".SignInActivity" />
+
+
     </application>
 
 </manifest>
