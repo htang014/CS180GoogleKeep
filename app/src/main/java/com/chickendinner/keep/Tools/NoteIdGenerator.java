@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class NoteIdGenerator {
 
-    private final int IdLength = 10;
+    private final int IdLength = 20;
 
     //note id is 10 bit string, include the upper lower case character and numbers.
     public String generateNoteId () {
