@@ -11,7 +11,12 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.view.View;
 
+import com.chickendinner.keep.prevew.PreviewListBean;
 import com.chickendinner.keep.prevew.PreviewRecyclerViewAdapter;
+import com.chickendinner.keep.recycler.CheckListBean;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_INFO = "com.chickendinner.keep.MESSAGE";
@@ -38,7 +43,14 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mRecyclerView.setAdapter(new PreviewRecyclerViewAdapter());
+        List<PreviewListBean> mDataset = new ArrayList<>();
+        mDataset.add(new PreviewListBean("1111","1111", "1",null));
+
+        mDataset.add(new PreviewListBean("123","123","1",null));
+
+        mDataset.add(new PreviewListBean("1234","1234","1",null));
+
+        mRecyclerView.setAdapter(new PreviewRecyclerViewAdapter(mDataset));
 
     }
 
