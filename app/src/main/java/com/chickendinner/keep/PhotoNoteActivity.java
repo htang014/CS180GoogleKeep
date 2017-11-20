@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -32,7 +33,9 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
 
     private ImageView mImageView;
     private ImageButton StartCameraBtn;
-    private File photoFile;
+    private File photoFile = null;
+
+    private String mCurrentPhotoPath;
 
     //requestCode
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -70,14 +73,6 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         StartCameraBtn = (ImageButton) findViewById(R.id.StartCamera);
 
         StartCameraBtn.setOnClickListener(this);
-        try
-        {
-            photoFile = createFile();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -99,10 +94,34 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         {
             case R.id.StartCamera:
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+//                try
+//                {
+//                    photoFile = createFile();
+//                }
+//                catch (IOException e)
+//                {
+//                    e.printStackTrace();
+//                }
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null)
+                {
+                    try
+                    {
+                        photoFile = createFile();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    if(photoFile != null){
+                        Uri photoURI = FileProvider.getUriForFile(this,
+                                "com.chickendinner.keep",
+                                photoFile);
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                    }
+                    //startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                 }
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                //takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
                 break;
 
             case R.id.textNoteTitle:
@@ -158,59 +177,99 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
 
                     mImageView.setImageBitmap(bitmap);*/
 
-                    Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    mImageView.setImageBitmap(photo);
-
+//                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+//                    mImageView.setImageBitmap(photo);
+                    setPic();
                     galleryAddPic();
                 }
                 break;
         }
     }
 
-    private File getPhotoDir()
-    {
-        File storDirPublic = null;
-
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            storDirPublic = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                    albumName);
-
-            if (storDirPublic != null) {
-                if (!storDirPublic.mkdirs()) {
-                    if (!storDirPublic.exists()) {
-                        Log.d("CameraSample", "failed to create directory");
-                        return null;
-                    }
-                }
-            }
-        } else {
-            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
-        }
-
-        return storDirPublic;
-
-    }
+//    private File getPhotoDir()
+//    {
+//        File storDirPublic = null;
+//
+//        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+//            storDirPublic = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+//                    albumName);
+//
+//            if (storDirPublic != null) {
+//                if (!storDirPublic.mkdirs()) {
+//                    if (!storDirPublic.exists()) {
+//                        Log.d("CameraSample", "failed to create directory");
+//                        return null;
+//                    }
+//                }
+//            }
+//        } else {
+//            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
+//        }
+//
+//        return storDirPublic;
+//
+//    }
 
     private File createFile() throws IOException
     {
-        photoFile = null;
-
-        String fileName;
-
+        // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        fileName = JPEG_FILE_PREFIX + timeStamp + "_";
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
 
-        photoFile = File.createTempFile(fileName, JPEG_FILE_SUFFIX, getPhotoDir());
-
-        return photoFile;
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+//        photoFile = null;
+//
+//        String fileName;
+//
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        fileName = JPEG_FILE_PREFIX + timeStamp + "_";
+//
+//        photoFile = File.createTempFile(fileName, JPEG_FILE_SUFFIX, getPhotoDir());
+//
+//        return photoFile;
     }
 
     private void galleryAddPic()
     {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(photoFile);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
+//        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//        Uri contentUri = Uri.fromFile(photoFile);
+//        mediaScanIntent.setData(contentUri);
+//        this.sendBroadcast(mediaScanIntent);
     }
+    private void setPic() {
+        // Get the dimensions of the View
+        int targetW = mImageView.getWidth();
+        int targetH = mImageView.getHeight();
 
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        mImageView.setImageBitmap(bitmap);
+    }
 }
