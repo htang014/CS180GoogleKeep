@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -104,6 +103,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                 break;
 
             case R.id.textNoteTitle:
+                break;
 
             case R.id.clear:
                 mImageView.setImageBitmap(null);
