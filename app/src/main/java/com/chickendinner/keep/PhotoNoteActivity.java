@@ -57,7 +57,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         mImageView = (ImageView) findViewById(R.id.imageView);
 
         cal = Calendar.getInstance();
-        updateTime();
+        //updateTime();
 
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
