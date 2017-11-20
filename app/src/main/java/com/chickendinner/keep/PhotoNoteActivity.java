@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -57,7 +56,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         mImageView = (ImageView) findViewById(R.id.imageView);
 
         cal = Calendar.getInstance();
-        updateTime();
+        //updateTime();
 
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();

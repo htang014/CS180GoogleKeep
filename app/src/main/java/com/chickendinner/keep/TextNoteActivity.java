@@ -65,8 +65,9 @@ public class TextNoteActivity extends NoteActivity implements View.OnFocusChange
             }
             if (view == mTextNoteBody) {
                 saveText = mTextNoteBody.getText().toString();
-                mReference.child(noteId).child("body").setValue(saveText);
+                mReference.child(noteId).child("data").setValue(saveText);
             }
+            mReference.child(noteId).child("type").setValue("0");
         }
     }
 

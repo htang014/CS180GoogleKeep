@@ -1,5 +1,6 @@
 package com.chickendinner.keep;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -35,7 +36,14 @@ public class ChecklistActivity extends NoteActivity {
         uid = mAuth.getUid();
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
-        noteId = mNoteIdGenerator.generateNoteId();
+        Intent i = getIntent();
+        if (i != null && i.getStringExtra("noteId") != null) {
+            EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+            mNoteTitle.setText(i.getStringExtra("title"));
+            noteId = i.getStringExtra("noteId");
+        } else {
+            noteId = mNoteIdGenerator.generateNoteId();
+        }
     }
 
     //Todo add database part here
