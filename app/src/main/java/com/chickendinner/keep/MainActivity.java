@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -14,17 +15,25 @@ import android.view.View;
 import com.chickendinner.keep.prevew.PreviewListBean;
 import com.chickendinner.keep.prevew.PreviewRecyclerViewAdapter;
 import com.chickendinner.keep.recycler.CheckListBean;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends NoteActivity {
     public static final String EXTRA_INFO = "com.chickendinner.keep.MESSAGE";
 
 //    private TextView mTextMessage;
     private Toolbar mToolbar;
 
     private RecyclerView mRecyclerView;
+
+    List<PreviewListBean> mDataset = new ArrayList<>();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,15 +52,43 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        List<PreviewListBean> mDataset = new ArrayList<>();
-        mDataset.add(new PreviewListBean("1111","1111", "1",null));
+        mAuth = FirebaseAuth.getInstance();
+        uid = mAuth.getUid();
 
-        mDataset.add(new PreviewListBean("123","123","1",null));
+        mDatabase = FirebaseDatabase.getInstance();
 
-        mDataset.add(new PreviewListBean("1234","1234","1",null));
+        mReference = mDatabase.getReference("users").child(uid);
 
-        mRecyclerView.setAdapter(new PreviewRecyclerViewAdapter(mDataset));
+        mReference.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        setPreviewData((Map<String,Object>) dataSnapshot.getValue());
+                    }
 
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //handle databaseError
+                    }
+                }
+        );
+
+        //mDataset.add(new PreviewListBean("0SJK50K3QDA8RVho7Mdq","1","1",null));
+        Log.e("data size => ", mDataset.size() + "");
+
+    }
+
+    public void setPreviewData(Map<String, Object> notes) {
+        for (String noteId : notes.keySet()) {
+            Log.e("noteId =>", noteId);
+            Map<String, Object> dataSet = (Map<String, Object>) notes.get(noteId);
+            String type = (String) dataSet.get("type");
+            String title = (String) dataSet.get("title");
+            Object data = dataSet.get("data");
+            mDataset.add(new PreviewListBean(noteId, title, type, data));
+        }
+
+        mRecyclerView.setAdapter(new PreviewRecyclerViewAdapter(mDataset, this));
     }
 
     @Override
