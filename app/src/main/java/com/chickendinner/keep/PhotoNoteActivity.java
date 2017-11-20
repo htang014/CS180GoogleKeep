@@ -15,13 +15,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 public class PhotoNoteActivity extends NoteActivity implements View.OnClickListener, View.OnFocusChangeListener
@@ -56,7 +60,26 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         uid = mAuth.getUid();
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
-        noteId = mNoteIdGenerator.generateNoteId();
+//        noteId = mNoteIdGenerator.generateNoteId();
+        Intent i = getIntent();
+        if (i != null && i.getStringExtra("noteId") != null) {
+            EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+            mNoteTitle.setText(i.getStringExtra("title"));
+            noteId = i.getStringExtra("noteId");
+            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    setSavedData((List<Object>) dataSnapshot.getValue());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        } else {
+            noteId = mNoteIdGenerator.generateNoteId();
+        }
 
         StartCameraBtn = (ImageButton) findViewById(R.id.StartCamera);
 
