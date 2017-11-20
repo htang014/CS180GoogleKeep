@@ -56,6 +56,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         mTextNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         mImageView = (ImageView) findViewById(R.id.imageView);
 
+        mEditTime = (TextView) findViewById(R.id.editTime);
         cal = Calendar.getInstance();
         updateTime();
 
