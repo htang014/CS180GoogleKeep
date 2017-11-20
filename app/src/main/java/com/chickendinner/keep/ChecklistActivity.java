@@ -3,6 +3,7 @@ package com.chickendinner.keep;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -11,11 +12,15 @@ import android.widget.TextView;
 import com.chickendinner.keep.recycler.CheckListBean;
 import com.chickendinner.keep.recycler.RecyclerListFragment;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 public class ChecklistActivity extends NoteActivity {
     RecyclerListFragment mRecyclerListFragment;
@@ -27,10 +32,7 @@ public class ChecklistActivity extends NoteActivity {
         setContentView(R.layout.activity_checklist);
         mRecyclerListFragment = (RecyclerListFragment) getFragmentManager().
                 findFragmentById(R.id.checklistFragment);
-        mRecyclerListFragment.addItem();
-        mEditTime = (TextView) findViewById(R.id.editTime);
-        cal = Calendar.getInstance();
-        updateTime();
+
 
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
@@ -41,15 +43,39 @@ public class ChecklistActivity extends NoteActivity {
             EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
             mNoteTitle.setText(i.getStringExtra("title"));
             noteId = i.getStringExtra("noteId");
+            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    setSavedData((List<Object>) dataSnapshot.getValue());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         } else {
             noteId = mNoteIdGenerator.generateNoteId();
+            mRecyclerListFragment.addItem();
+        }
+
+        mEditTime = (TextView) findViewById(R.id.editTime);
+        cal = Calendar.getInstance();
+        updateTime();
+    }
+
+    protected void setSavedData(List<Object> dataSet) {
+        List<CheckListBean> mDataset = new ArrayList<>();
+        for (Object tp : dataSet) {
+            Map<String, Object> m = (Map<String, Object>) tp;
+            mRecyclerListFragment.addItem((String)m.get("text"), (boolean)m.get("check"));
         }
     }
 
     //Todo add database part here
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-        List<CheckListBean> data = mRecyclerListFragment.getStringAndCheckData();
+        List<CheckListBean> data = mRecyclerListFragment.getmDataset();
         mReference.child(noteId).child("type").setValue("1");
         mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
