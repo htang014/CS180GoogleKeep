@@ -19,14 +19,15 @@ public class RecyclerListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private RecyclerListAdapter mRecyclerAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private ArrayList<CheckListBean> mDataset;
+    private List<CheckListBean> mDataset;
 
-    public ArrayList<CheckListBean> getmDataset() {
+    public List<CheckListBean> getmDataset() {
         return mDataset;
     }
 
-    public void setmDataset(ArrayList<CheckListBean> mDataset) {
+    public void setmDataset(List<CheckListBean> mDataset) {
         this.mDataset = mDataset;
+        mRecyclerAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -66,7 +67,9 @@ public class RecyclerListFragment extends Fragment {
         mRecyclerAdapter.notifyDataSetChanged();
     }
 
-    public List<CheckListBean> getStringAndCheckData() {
-        return mDataset;
+    public void addItem(String text, boolean check) {
+        mDataset.add(new CheckListBean(text, check));
+        mRecyclerAdapter.notifyDataSetChanged();
     }
+
 }
