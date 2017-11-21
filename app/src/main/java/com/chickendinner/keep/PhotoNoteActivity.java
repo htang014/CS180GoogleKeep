@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.chickendinner.keep.recycler.CheckListBean;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 public class PhotoNoteActivity extends NoteActivity implements View.OnClickListener, View.OnFocusChangeListener
@@ -69,7 +71,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    setSavedData((List<Object>) dataSnapshot.getValue());
+                    setSavedData((Map<String, Object>) dataSnapshot.getValue());
                 }
 
                 @Override
@@ -84,6 +86,20 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         StartCameraBtn = (ImageButton) findViewById(R.id.StartCamera);
 
         StartCameraBtn.setOnClickListener(this);
+    }
+
+    protected void setSavedData(Map<String, Object> data) {
+            String res = (String) data.get("data");
+            setPic(res);
+    }
+
+    //Todo add database part here
+    protected void saveDataToDB() {
+        EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+        String data = mCurrentPhotoPath;
+        mReference.child(noteId).child("type").setValue("3");
+        mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
+        mReference.child(noteId).child("data").setValue(data);
     }
 
     @Override
@@ -133,6 +149,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                 break;
 
             case R.id.save:
+                saveDataToDB();
                 finish();
                 break;
 
@@ -157,7 +174,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK)
                 {
-                    setPic();
+                    setPic(mCurrentPhotoPath);
                     galleryAddPic();
                 }
                 break;
@@ -189,7 +206,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
     }
-    private void setPic()
+    private void setPic(String imagepath)
     {
         // Get the dimensions of the View
         int targetW = mImageView.getWidth();
@@ -210,7 +227,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        Bitmap bitmap = BitmapFactory.decodeFile(imagepath, bmOptions);
         mImageView.setImageBitmap(bitmap);
     }
 }
