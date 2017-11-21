@@ -12,15 +12,24 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import com.chickendinner.keep.recycler.CheckListBean;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 public class PhotoNoteActivity extends NoteActivity implements View.OnClickListener, View.OnFocusChangeListener
@@ -55,11 +64,46 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         uid = mAuth.getUid();
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
-        noteId = mNoteIdGenerator.generateNoteId();
+        //noteId = mNoteIdGenerator.generateNoteId();
+
+        Intent i = getIntent();
+        if (i != null && i.getStringExtra("noteId") != null) {
+            EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+            mNoteTitle.setText(i.getStringExtra("title"));
+            noteId = i.getStringExtra("noteId");
+            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    setSavedData((Map<String, Object>) dataSnapshot.getValue());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        } else {
+            noteId = mNoteIdGenerator.generateNoteId();
+        }
 
         StartCameraBtn = (ImageButton) findViewById(R.id.StartCamera);
 
         StartCameraBtn.setOnClickListener(this);
+    }
+
+    protected void setSavedData(Map<String, Object> data)
+    {
+        String res = (String) data.get("data");
+        setPic(res);
+    }
+
+    //Todo add database part here
+    protected void saveDataToDB() {
+        EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+        String data = mCurrentPhotoPath;
+        mReference.child(noteId).child("type").setValue("3");
+        mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
+        mReference.child(noteId).child("data").setValue(data);
     }
 
     @Override
@@ -71,6 +115,11 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                 mReference.child("title").setValue(saveText);
             }
         }
+    }
+
+    private void clearAllFocus()
+    {
+        mTextNoteTitle.clearFocus();
     }
 
     @Override
@@ -109,6 +158,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                 break;
 
             case R.id.save:
+                saveDataToDB();
                 finish();
                 break;
 
@@ -116,11 +166,6 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                 finish();
                 break;
         }
-    }
-
-    private void clearAllFocus()
-    {
-        mTextNoteTitle.clearFocus();
     }
 
     @Override
@@ -133,8 +178,8 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK)
                 {
-                    setPic();
-                    galleryAddPic();
+                    setPic(mCurrentPhotoPath);
+                    //galleryAddPic();
                 }
                 break;
         }
@@ -157,16 +202,39 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         return image;
     }
 
-    private void galleryAddPic()
-    {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
-    private void setPic()
-    {
+//    private void galleryAddPic()
+//    {
+//        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//        File f = new File(mCurrentPhotoPath);
+//        Uri contentUri = Uri.fromFile(f);
+//        mediaScanIntent.setData(contentUri);
+//        this.sendBroadcast(mediaScanIntent);
+//    }
+//    private void setPic()
+//    {
+//        // Get the dimensions of the View
+//        int targetW = mImageView.getWidth();
+//        int targetH = mImageView.getHeight();
+//
+//        // Get the dimensions of the bitmap
+//        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+//        bmOptions.inJustDecodeBounds = true;
+//        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+//        int photoW = bmOptions.outWidth;
+//        int photoH = bmOptions.outHeight;
+//
+//        // Determine how much to scale down the image
+//        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+//
+//        // Decode the image file into a Bitmap sized to fill the View
+//        bmOptions.inJustDecodeBounds = false;
+//        bmOptions.inSampleSize = scaleFactor;
+//        bmOptions.inPurgeable = true;
+//
+//        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+//        mImageView.setImageBitmap(bitmap);
+//    }
+    private void setPic(String imagepath) {
         // Get the dimensions of the View
         int targetW = mImageView.getWidth();
         int targetH = mImageView.getHeight();
@@ -179,14 +247,34 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         int photoH = bmOptions.outHeight;
 
         // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        Bitmap bitmap = BitmapFactory.decodeFile(imagepath, bmOptions);
         mImageView.setImageBitmap(bitmap);
+
+        File f = photoFile;
+
+        try {
+            f.createNewFile();
+            FileOutputStream out;
+            out = new FileOutputStream(f);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            Uri uri = Uri.fromFile(photoFile);
+            intent.setData(uri);
+            this.sendBroadcast(intent);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
