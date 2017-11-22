@@ -65,7 +65,6 @@ public class ChecklistActivity extends NoteActivity {
     }
 
     protected void setSavedData(List<Object> dataSet) {
-        List<CheckListBean> mDataset = new ArrayList<>();
         for (Object tp : dataSet) {
             Map<String, Object> m = (Map<String, Object>) tp;
             mRecyclerListFragment.addItem((String)m.get("text"), (boolean)m.get("check"));
