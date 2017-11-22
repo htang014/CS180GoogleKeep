@@ -25,10 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends NoteActivity {
+public class MainActivity extends NoteActivity
+{
     public static final String EXTRA_INFO = "com.chickendinner.keep.MESSAGE";
 
-    //    private TextView mTextMessage;
     private Toolbar mToolbar;
 
     private RecyclerView mRecyclerView;
@@ -36,7 +36,8 @@ public class MainActivity extends NoteActivity {
     List<PreviewListBean> mDataset = new ArrayList<>();;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -47,7 +48,8 @@ public class MainActivity extends NoteActivity {
 
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
-        if(uid!=null) {
+        if(uid!=null)
+        {
             mRecyclerView = (RecyclerView) findViewById(R.id.preview_list);
 
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -86,7 +88,8 @@ public class MainActivity extends NoteActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.options, menu);
         return true;
@@ -108,23 +111,20 @@ public class MainActivity extends NoteActivity {
         }
     }
 
-    public void makeNote(View view) {
+    public void makeNote(View view)
+    {
         Intent intent = null;
         switch (view.getId()) {
             case R.id.textNoteButton:
-//                mTextMessage.setText("text note");
                 intent = new Intent(this, TextNoteActivity.class);
                 break;
             case R.id.checklistButton:
-//                mTextMessage.setText("checklist");
                 intent = new Intent(this, ChecklistActivity.class);
                 break;
             case R.id.drawingButton:
-//                mTextMessage.setText("drawing");
                 intent = new Intent(this, DrawingActivity.class);
                 break;
             case R.id.photoButton:
-//                mTextMessage.setText("photo");
                 intent = new Intent(this, PhotoNoteActivity.class);
                 break;
         }

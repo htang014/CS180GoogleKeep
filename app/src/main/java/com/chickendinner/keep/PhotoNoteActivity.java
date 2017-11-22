@@ -76,14 +76,17 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
             mNoteTitle.setText(i.getStringExtra("title"));
             noteId = i.getStringExtra("noteId");
-            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
+            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener()
+            {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void onDataChange(DataSnapshot dataSnapshot)
+                {
                     setSavedData((String) dataSnapshot.getValue());
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
+                public void onCancelled(DatabaseError databaseError)
+                {
 
                 }
             });
@@ -286,7 +289,8 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         return null;
     }
 
-    private static void scanFile(Context context, String filePath) {
+    private static void scanFile(Context context, String filePath)
+    {
         Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         scanIntent.setData(Uri.fromFile(new File(filePath)));
         context.sendBroadcast(scanIntent);
