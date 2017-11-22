@@ -93,7 +93,7 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
 
-        noteId = "1231231231312";
+        noteId = mNoteIdGenerator.generateNoteId();
     }
 
     @Override
