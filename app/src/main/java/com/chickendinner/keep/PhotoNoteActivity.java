@@ -1,11 +1,15 @@
 package com.chickendinner.keep;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.view.View;
@@ -13,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chickendinner.keep.recycler.CheckListBean;
 import com.google.firebase.auth.FirebaseAuth;
@@ -43,6 +48,12 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     private File photoFile = null;
 
     private String mCurrentPhotoPath;
+    private String mResultPhotoPath;
+
+    private ProgressDialog mSaveProgressDlg;
+    private static final int MSG_SAVE_SUCCESS = 1;
+    private static final int MSG_SAVE_FAILED = 2;
+    private Handler mHandler;
 
     //requestCode
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -94,13 +105,13 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     protected void setSavedData(Map<String, Object> data)
     {
         String res = (String) data.get("data");
-        setPic(res);
+        setPic();
     }
 
     //Todo add database part here
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-        String data = mCurrentPhotoPath;
+        String data = mResultPhotoPath;
         mReference.child(noteId).child("type").setValue("3");
         mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
@@ -178,7 +189,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK)
                 {
-                    setPic(mCurrentPhotoPath);
+                    setPic();
                     //galleryAddPic();
                 }
                 break;
@@ -188,8 +199,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     private File createFile() throws IOException
     {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = System.currentTimeMillis() + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -202,39 +212,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         return image;
     }
 
-//    private void galleryAddPic()
-//    {
-//        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-//        File f = new File(mCurrentPhotoPath);
-//        Uri contentUri = Uri.fromFile(f);
-//        mediaScanIntent.setData(contentUri);
-//        this.sendBroadcast(mediaScanIntent);
-//    }
-//    private void setPic()
-//    {
-//        // Get the dimensions of the View
-//        int targetW = mImageView.getWidth();
-//        int targetH = mImageView.getHeight();
-//
-//        // Get the dimensions of the bitmap
-//        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-//        bmOptions.inJustDecodeBounds = true;
-//        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-//        int photoW = bmOptions.outWidth;
-//        int photoH = bmOptions.outHeight;
-//
-//        // Determine how much to scale down the image
-//        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-//
-//        // Decode the image file into a Bitmap sized to fill the View
-//        bmOptions.inJustDecodeBounds = false;
-//        bmOptions.inSampleSize = scaleFactor;
-//        bmOptions.inPurgeable = true;
-//
-//        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-//        mImageView.setImageBitmap(bitmap);
-//    }
-    private void setPic(String imagepath) {
+    private void setPic() {
         // Get the dimensions of the View
         int targetW = mImageView.getWidth();
         int targetH = mImageView.getHeight();
@@ -254,27 +232,66 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(imagepath, bmOptions);
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+
+
+        String savedFile = saveImage(bitmap, 100);
+        mResultPhotoPath = savedFile;
+
+        scanFile(PhotoNoteActivity.this, savedFile);
         mImageView.setImageBitmap(bitmap);
+    }
 
-        File f = photoFile;
-
+    private static String saveImage(Bitmap bmp, int quality) {
+        if (bmp == null) {
+            return null;
+        }
+        File appDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        if (appDir == null) {
+            return null;
+        }
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = "JPEG_" + timeStamp + ".jpg";
+        File file = new File(appDir, fileName);
+        FileOutputStream fos = null;
         try {
-            f.createNewFile();
-            FileOutputStream out;
-            out = new FileOutputStream(f);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            Uri uri = Uri.fromFile(photoFile);
-            intent.setData(uri);
-            this.sendBroadcast(intent);
+            fos = new FileOutputStream(file);
+            bmp.compress(Bitmap.CompressFormat.JPEG, quality, fos);
+            fos.flush();
+            return file.getAbsolutePath();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+        return null;
+    }
 
+    public boolean handleMessage(Message msg) {
+        switch (msg.what) {
+            case MSG_SAVE_FAILED:
+                mSaveProgressDlg.dismiss();
+                Toast.makeText(this, "Save Failed", Toast.LENGTH_SHORT).show();
+                break;
+            case MSG_SAVE_SUCCESS:
+                mSaveProgressDlg.dismiss();
+                Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return true;
+    }
+
+    private static void scanFile(Context context, String filePath) {
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(filePath)));
+        context.sendBroadcast(scanIntent);
     }
 }
