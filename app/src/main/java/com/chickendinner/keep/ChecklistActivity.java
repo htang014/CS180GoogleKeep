@@ -87,6 +87,13 @@ public class ChecklistActivity extends NoteActivity implements View.OnFocusChang
         }
     }
 
+    public void save(){
+        List<CheckListBean> data = mRecyclerListFragment.getmDataset();
+        mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
+        mReference.child(noteId).child("data").setValue(data);
+        mReference.child(noteId).child("type").setValue("1");
+    }
+
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
         if (!hasFocus) {
@@ -108,6 +115,7 @@ public class ChecklistActivity extends NoteActivity implements View.OnFocusChang
                 break;
             case R.id.backButton:
                 //saveDataToDB();
+                save();
                 finish();
                 break;
             case R.id.addItemButton:
