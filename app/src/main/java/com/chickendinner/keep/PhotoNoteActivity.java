@@ -1,25 +1,24 @@
 package com.chickendinner.keep;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+import android.Manifest;
 
-import com.chickendinner.keep.recycler.CheckListBean;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,7 +32,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 
@@ -50,11 +48,6 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     private String mCurrentPhotoPath;
     private String mResultPhotoPath;
 
-    private ProgressDialog mSaveProgressDlg;
-    private static final int MSG_SAVE_SUCCESS = 1;
-    private static final int MSG_SAVE_FAILED = 2;
-    private Handler mHandler;
-
     //requestCode
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -69,13 +62,12 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
 
         mEditTime = (TextView) findViewById(R.id.editTime);
         cal = Calendar.getInstance();
-        //updateTime();
+        updateTime();
 
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
-        //noteId = mNoteIdGenerator.generateNoteId();
 
         Intent i = getIntent();
         if (i != null && i.getStringExtra("noteId") != null) {
@@ -85,7 +77,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    setSavedData((Map<String, Object>) dataSnapshot.getValue());
+                    setSavedData((String) dataSnapshot.getValue());
                 }
 
                 @Override
@@ -102,16 +94,35 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         StartCameraBtn.setOnClickListener(this);
     }
 
-    protected void setSavedData(Map<String, Object> data)
+    protected void setSavedData(String data)
     {
-        String res = (String) data.get("data");
-        setPic();
+        // Get the dimensions of the View
+        int targetW = mImageView.getWidth();
+        int targetH = mImageView.getHeight();
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(data, bmOptions);
+        mImageView.setImageBitmap(bitmap);
     }
 
     //Todo add database part here
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-        String data = mResultPhotoPath;
+        String data = mCurrentPhotoPath;
         mReference.child(noteId).child("type").setValue("3");
         mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
@@ -140,6 +151,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         switch (view.getId())
         {
             case R.id.StartCamera:
+                requestAllPower();
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null)
                 {
@@ -189,8 +201,33 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK)
                 {
-                    setPic();
-                    //galleryAddPic();
+                    // Get the dimensions of the View
+                    int targetW = mImageView.getWidth();
+                    int targetH = mImageView.getHeight();
+
+                    // Get the dimensions of the bitmap
+                    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                    bmOptions.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+                    int photoW = bmOptions.outWidth;
+                    int photoH = bmOptions.outHeight;
+
+                    // Determine how much to scale down the image
+                    int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+                    // Decode the image file into a Bitmap sized to fill the View
+                    bmOptions.inJustDecodeBounds = false;
+                    bmOptions.inSampleSize = scaleFactor;
+                    bmOptions.inPurgeable = true;
+
+                    Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+
+                    String savedFile = saveImage(bitmap, 100);
+                    mResultPhotoPath = savedFile;
+
+                    scanFile(PhotoNoteActivity.this, savedFile);
+
+                    mImageView.setImageBitmap(bitmap);
                 }
                 break;
         }
@@ -210,36 +247,6 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
-    }
-
-    private void setPic() {
-        // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-
-
-        String savedFile = saveImage(bitmap, 100);
-        mResultPhotoPath = savedFile;
-
-        scanFile(PhotoNoteActivity.this, savedFile);
-        mImageView.setImageBitmap(bitmap);
     }
 
     private static String saveImage(Bitmap bmp, int quality) {
@@ -275,23 +282,23 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         return null;
     }
 
-    public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case MSG_SAVE_FAILED:
-                mSaveProgressDlg.dismiss();
-                Toast.makeText(this, "Save Failed", Toast.LENGTH_SHORT).show();
-                break;
-            case MSG_SAVE_SUCCESS:
-                mSaveProgressDlg.dismiss();
-                Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
-                break;
-        }
-        return true;
-    }
-
     private static void scanFile(Context context, String filePath) {
         Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         scanIntent.setData(Uri.fromFile(new File(filePath)));
         context.sendBroadcast(scanIntent);
+    }
+
+    public void requestAllPower() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            }
+        }
     }
 }
