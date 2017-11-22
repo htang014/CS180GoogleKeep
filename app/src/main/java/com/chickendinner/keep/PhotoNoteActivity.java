@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 
 
 public class PhotoNoteActivity extends NoteActivity implements View.OnClickListener, View.OnFocusChangeListener

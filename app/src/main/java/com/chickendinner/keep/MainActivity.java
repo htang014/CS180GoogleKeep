@@ -43,39 +43,33 @@ public class MainActivity extends NoteActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-//        mTextMessage = (TextView) findViewById(R.id.textMessage);
-//        mTextMessage.setText("This is a placeholder.  Click a button to display text.");
-
         signInWithGoogle();
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.preview_list);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
+        if(uid!=null) {
+            mRecyclerView = (RecyclerView) findViewById(R.id.preview_list);
 
-        mDatabase = FirebaseDatabase.getInstance();
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mReference = mDatabase.getReference("users").child(uid);
+            mDatabase = FirebaseDatabase.getInstance();
 
-        mReference.addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        setPreviewData((Map<String,Object>) dataSnapshot.getValue());
+            mReference = mDatabase.getReference("users").child(uid);
+
+            mReference.addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            setPreviewData((Map<String, Object>) dataSnapshot.getValue());
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                        }
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        //handle databaseError
-                    }
-                }
-        );
-
-        //mDataset.add(new PreviewListBean("0SJK50K3QDA8RVho7Mdq","1","1",null));
-        Log.e("data size => ", mDataset.size() + "");
-
+            );
+        }
+            Log.e("data size => ", mDataset.size() + "");
     }
 
     public void setPreviewData(Map<String, Object> notes) {
