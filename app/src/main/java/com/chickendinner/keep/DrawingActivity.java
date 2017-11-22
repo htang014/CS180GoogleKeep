@@ -16,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +28,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.chickendinner.keep.recycler.CheckListBean;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -64,6 +69,8 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
     private EditText mTextNoteTitle;
     private String noteId;
     private String savedFile;
+    private FirebaseStorage storage;
+    private StorageReference imagesRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +110,9 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
 
+        storage = FirebaseStorage.getInstance();
+        imagesRef = storage.getReference().child("images");
+
         Intent i = getIntent();
         String loadKey = i.getStringExtra(MainActivity.EXTRA_KEY);
         String loadTitle = i.getStringExtra(MainActivity.EXTRA_TITLE);
@@ -110,17 +120,6 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         if (!loadKey.equals("")) {
             mTextNoteTitle.setText(loadTitle);
             noteId = loadKey;
-            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    //.setText((String) dataSnapshot.getValue());
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
         } else {
             noteId = mNoteIdGenerator.generateNoteId();
         }
@@ -226,7 +225,7 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         String data = savedFile;
-        mReference.child(noteId).child("type").setValue("2");
+        mReference.child(noteId).child("type").setValue("3");
         mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
     }
@@ -251,14 +250,14 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                 mPenView.setSelected(false);
                 mPaletteView.setMode(PaletteView.Mode.ERASER);
                 break;
-            /*case R.id.clear:
+            case R.id.clear:
                 mPaletteView.clear();
-                break;*/
+                break;
             case R.id.backButton:
                 saveDataToDB();
                 finish();
-                break;
-            case R.id.saveButton:
+                //break;
+            //case R.id.saveButton:
                 requestAllPower();
                 if (mSaveProgressDlg == null) {
                     initSaveProgressDlg();
@@ -268,13 +267,14 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                     @Override
                     public void run() {
                         Bitmap bm = mPaletteView.buildBitmap();
-                        savedFile = saveImage(bm, 100);
+                        uploadPic(bm);
+                        /*savedFile = saveImage(bm, 100);
                         if (savedFile != null) {
                             scanFile(DrawingActivity.this, savedFile);
                             mHandler.obtainMessage(MSG_SAVE_SUCCESS).sendToTarget();
                         } else {
                             mHandler.obtainMessage(MSG_SAVE_FAILED).sendToTarget();
-                        }
+                        }*/
                     }
                 }).start();
                 break;
@@ -289,5 +289,26 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
 
     private void clearAllFocus() {
         mTextNoteTitle.clearFocus();
+    }
+
+    public void uploadPic(Bitmap bitmap) {
+        StorageReference myImageRef = imagesRef.child(noteId + ".jpg");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = myImageRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+            }
+        });
     }
 }

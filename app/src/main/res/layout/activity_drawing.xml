@@ -10,6 +10,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/background_light"
             android:elevation="5dp"
+            android:gravity="center"
             android:orientation="horizontal">
 
                 <ImageButton
@@ -28,32 +29,32 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="10" />
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/undo"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_action_undo" />
-
-                <ImageView
-                    android:id="@+id/redo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_action_redo" />
+                    android:onClick="onClick"
+                    app:srcCompat="@drawable/ic_undo_black_24dp" />
 
                 <ImageButton
-                    android:id="@+id/saveButton"
+                    android:id="@+id/redo"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:background="@android:color/transparent"
                     android:onClick="onClick"
-                    android:src="@drawable/ic_action_save"
-                    android:background="@android:color/transparent"/>
+                    app:srcCompat="@drawable/ic_redo_black_24dp" />
+
+                <ImageButton
+                    android:id="@+id/trashButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:onClick="onClick"
+                    app:srcCompat="@drawable/ic_delete" />
         </LinearLayout>
 
 
@@ -113,31 +114,32 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/pen"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:scaleType="centerInside"
+                    android:onClick="onClick"
                     app:srcCompat="@drawable/ic_drawing_black_24dp" />
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/eraser"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_action_erase" />
+                    android:onClick="onClick"
+                    app:srcCompat="@drawable/ic_eraser_black_24dp" />
 
-                <ImageView
-                    android:id="@+id/trashButton"
+                <ImageButton
+                    android:id="@+id/clear"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_delete" />
+                    android:onClick="onClick"
+                    app:srcCompat="@drawable/ic_clear_black_24dp" />
+
         </LinearLayout>
 </LinearLayout>

@@ -58,8 +58,8 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     private String mCurrentPhotoPath;
     private String mResultPhotoPath;
 
-    FirebaseStorage storage;
-    StorageReference imagesRef;
+    private FirebaseStorage storage;
+    private StorageReference imagesRef;
 
     //requestCode
     private static final int REQUEST_IMAGE_CAPTURE = 1;

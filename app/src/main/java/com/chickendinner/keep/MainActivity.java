@@ -182,6 +182,7 @@ public class MainActivity extends NoteActivity {
     }
 
     private void signOutWithGoogle() {
+        uid = null;
         Intent intent = new Intent(this, SignInActivity.class);
         intent.putExtra(EXTRA_INFO, "sign_out");
         startActivity(intent);
