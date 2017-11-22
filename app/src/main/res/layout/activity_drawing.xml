@@ -132,7 +132,7 @@
                     android:src="@drawable/ic_action_erase" />
 
                 <ImageView
-                    android:id="@+id/clear"
+                    android:id="@+id/trashButton"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"

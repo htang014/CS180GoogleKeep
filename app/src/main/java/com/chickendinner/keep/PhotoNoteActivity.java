@@ -72,6 +72,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
 
         mTextNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         mImageView = (ImageView) findViewById(R.id.imageView);
+        //mTextNoteTitle.setOnFocusChangeListener(this);
 
         mEditTime = (TextView) findViewById(R.id.editTime);
         cal = Calendar.getInstance();
@@ -136,11 +137,10 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     }
 
     protected void saveDataToDB() {
-        EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         String data = "/images/" + noteId + ".jpg";
         uploadPic();
         mReference.child(noteId).child("type").setValue("3");
-        mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
+        mReference.child(noteId).child("title").setValue(mTextNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
     }
 
@@ -188,9 +188,9 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
             case R.id.textNoteTitle:
                 break;
 
-            case R.id.clear:
+            /*case R.id.clear:
                 mImageView.setImageBitmap(null);
-                break;
+                break;*/
 
             case R.id.save:
                 finish();
@@ -198,6 +198,11 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
 
             case R.id.backButton:
                 saveDataToDB();
+                finish();
+                break;
+            case R.id.trashButton:
+                mReference.child(noteId).removeValue();
+                imagesRef.child(noteId + ".jpg").delete();
                 finish();
                 break;
         }

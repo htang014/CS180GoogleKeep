@@ -81,7 +81,7 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         mPenView = findViewById(R.id.pen);
         mPenView.setSelected(true);
         mEraserView = findViewById(R.id.eraser);
-        mClearView = findViewById(R.id.clear);
+        mClearView = findViewById(R.id.trashButton);
 
         mUndoView.setOnClickListener(this);
         mRedoView.setOnClickListener(this);
@@ -251,9 +251,9 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                 mPenView.setSelected(false);
                 mPaletteView.setMode(PaletteView.Mode.ERASER);
                 break;
-            case R.id.clear:
+            /*case R.id.clear:
                 mPaletteView.clear();
-                break;
+                break;*/
             case R.id.backButton:
                 saveDataToDB();
                 finish();
@@ -279,6 +279,10 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                 }).start();
                 break;
             case R.id.textNoteTitle:
+                break;
+            case R.id.trashButton:
+                mReference.child(noteId).removeValue();
+                finish();
                 break;
         }
     }

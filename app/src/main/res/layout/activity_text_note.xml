@@ -35,6 +35,17 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="10" />
 
+            <ImageButton
+                android:id="@+id/trashButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:onClick="onClick"
+                android:paddingBottom="15dp"
+                android:paddingTop="15dp"
+                app:srcCompat="@drawable/ic_delete" />
+
         </LinearLayout>
 
         <ScrollView

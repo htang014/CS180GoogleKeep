@@ -83,6 +83,10 @@ public class TextNoteActivity extends NoteActivity implements View.OnFocusChange
             case R.id.backButton:
                 finish();
                 break;
+            case R.id.trashButton:
+                mReference.child(noteId).removeValue();
+                finish();
+                break;
         }
     }
 
