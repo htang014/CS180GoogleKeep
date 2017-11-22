@@ -41,21 +41,25 @@ public class TextNoteActivity extends NoteActivity implements View.OnFocusChange
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
         mDatabase = FirebaseDatabase.getInstance();
-        mReference = mDatabase.getReference("users").child(uid);
+        mReference = mDatabase.getReference("users/" + uid);
 
         mTextNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         mTextNoteBody = (EditText) findViewById(R.id.textNoteBody);
         mTextNoteTitle.setOnFocusChangeListener(this);
         mTextNoteBody.setOnFocusChangeListener(this);
+
+        // Get extra data from MainActivity
         Intent i = getIntent();
-        if (i != null && i.getStringExtra("noteId") != null) {
-            EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-            mNoteTitle.setText(i.getStringExtra("title"));
-            noteId = i.getStringExtra("noteId");
+        String loadKey = i.getStringExtra(MainActivity.EXTRA_KEY);
+        String loadTitle = i.getStringExtra(MainActivity.EXTRA_TITLE);
+
+        if (!loadKey.equals("")) {
+            mTextNoteTitle.setText(loadTitle);
+            noteId = loadKey;
             mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    setSavedData((String) dataSnapshot.getValue());
+                    mTextNoteBody.setText((String) dataSnapshot.getValue());
                 }
 
                 @Override
@@ -66,12 +70,6 @@ public class TextNoteActivity extends NoteActivity implements View.OnFocusChange
         } else {
             noteId = mNoteIdGenerator.generateNoteId();
         }
-    }
-
-    protected void setSavedData(String data) {
-        String savedtext = data;
-        mTextNoteBody.setText(data);
-
     }
 
     @Override

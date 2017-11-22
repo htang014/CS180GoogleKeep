@@ -1,6 +1,7 @@
 package com.chickendinner.keep;
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,8 +18,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -39,10 +42,13 @@ public class ChecklistActivity extends NoteActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
         Intent i = getIntent();
-        if (i != null && i.getStringExtra("noteId") != null) {
+        String loadKey = i.getStringExtra(MainActivity.EXTRA_KEY);
+        String loadTitle = i.getStringExtra(MainActivity.EXTRA_TITLE);
+
+        if (!loadKey.equals("")) {
             EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-            mNoteTitle.setText(i.getStringExtra("title"));
-            noteId = i.getStringExtra("noteId");
+            mNoteTitle.setText(loadTitle);
+            noteId = loadKey;
             mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -71,7 +77,6 @@ public class ChecklistActivity extends NoteActivity {
         }
     }
 
-    //Todo add database part here
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         List<CheckListBean> data = mRecyclerListFragment.getmDataset();

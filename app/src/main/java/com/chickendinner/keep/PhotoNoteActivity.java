@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -19,12 +20,21 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.Manifest;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -48,6 +58,9 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     private String mCurrentPhotoPath;
     private String mResultPhotoPath;
 
+    FirebaseStorage storage;
+    StorageReference imagesRef;
+
     //requestCode
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -67,24 +80,26 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
         mDatabase = FirebaseDatabase.getInstance();
-        mReference = mDatabase.getReference("users").child(uid);
+        mReference = mDatabase.getReference("users/"+uid);
+
+        storage = FirebaseStorage.getInstance();
+        imagesRef = storage.getReference().child("images");
 
         Intent i = getIntent();
-        if (i != null && i.getStringExtra("noteId") != null) {
+        String loadKey = i.getStringExtra(MainActivity.EXTRA_KEY);
+        String loadTitle = i.getStringExtra(MainActivity.EXTRA_TITLE);
+        if (!loadKey.equals("")) {
             EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-            mNoteTitle.setText(i.getStringExtra("title"));
-            noteId = i.getStringExtra("noteId");
-            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    setSavedData((String) dataSnapshot.getValue());
-                }
+            mNoteTitle.setText(loadTitle);
+            noteId = loadKey;
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+            // Load the image using Glide
+            Glide.with(this )
+                    .using(new FirebaseImageLoader())
+                    .load(imagesRef.child(noteId + ".jpg"))
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .into(mImageView);
         } else {
             noteId = mNoteIdGenerator.generateNoteId();
         }
@@ -92,6 +107,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         StartCameraBtn = (ImageButton) findViewById(R.id.StartCamera);
 
         StartCameraBtn.setOnClickListener(this);
+
     }
 
     protected void setSavedData(String data)
@@ -119,10 +135,10 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         mImageView.setImageBitmap(bitmap);
     }
 
-    //Todo add database part here
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-        String data = mCurrentPhotoPath;
+        String data = "/images/" + noteId + ".jpg";
+        uploadPic();
         mReference.child(noteId).child("type").setValue("3");
         mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
@@ -131,11 +147,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
         if (!hasFocus) {
-            String saveText;
-            if (view == mTextNoteTitle) {
-                saveText = mTextNoteTitle.getText().toString();
-                mReference.child("title").setValue(saveText);
-            }
+            saveDataToDB();
         }
     }
 
@@ -181,11 +193,11 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                 break;
 
             case R.id.save:
-                saveDataToDB();
                 finish();
                 break;
 
             case R.id.backButton:
+                saveDataToDB();
                 finish();
                 break;
         }
@@ -300,5 +312,29 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                                 Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             }
         }
+    }
+
+    public void uploadPic() {
+        StorageReference myImageRef = imagesRef.child(noteId + ".jpg");
+        mImageView.setDrawingCacheEnabled(true);
+        mImageView.buildDrawingCache();
+        Bitmap bitmap = mImageView.getDrawingCache();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = myImageRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+            }
+        });
     }
 }

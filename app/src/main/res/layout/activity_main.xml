@@ -26,21 +26,11 @@
         android:layout_weight="1"
         android:elevation="0dp">
 
-        <ScrollView
+        <ListView
+            android:id="@+id/preview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/preview_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </LinearLayout>
-        </ScrollView>
     </FrameLayout>
 
     <LinearLayout

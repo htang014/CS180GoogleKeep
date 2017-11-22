@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,9 +28,18 @@ import android.widget.Toast;
 import android.Manifest;
 
 import com.chickendinner.keep.recycler.CheckListBean;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -93,7 +103,27 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         mDatabase = FirebaseDatabase.getInstance();
         mReference = mDatabase.getReference("users").child(uid);
 
-        noteId = "1231231231312";
+        Intent i = getIntent();
+        String loadKey = i.getStringExtra(MainActivity.EXTRA_KEY);
+        String loadTitle = i.getStringExtra(MainActivity.EXTRA_TITLE);
+
+        if (!loadKey.equals("")) {
+            mTextNoteTitle.setText(loadTitle);
+            noteId = loadKey;
+            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    //.setText((String) dataSnapshot.getValue());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        } else {
+            noteId = mNoteIdGenerator.generateNoteId();
+        }
     }
 
     @Override
@@ -196,7 +226,7 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
         String data = savedFile;
-        mReference.child(noteId).child("type").setValue("3");
+        mReference.child(noteId).child("type").setValue("2");
         mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
     }

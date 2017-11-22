@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.chickendinner.keep.TextNoteActivity">
+    tools:context="com.chickendinner.keep.PhotoNoteActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -48,15 +48,6 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="340dp"
-            android:layout_centerInParent="true"
-            android:layout_marginBottom="30dp"
-            android:contentDescription="TODO"
-            android:visibility="visible" />
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -66,6 +57,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="340dp"
+                    android:layout_centerInParent="true"
+                    android:layout_marginBottom="30dp"
+                    android:layout_weight="0.1"
+                    android:contentDescription="TODO"
+                    android:visibility="visible" />
 
                 <EditText
                     android:id="@+id/textNoteTitle"
@@ -98,35 +99,6 @@
             android:elevation="5dp"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/save"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="onClick"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_action_save" />
-
-            <ImageButton
-                android:id="@+id/clear"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:onClick="onClick"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_delete" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/background_light"
-            android:elevation="5dp"
-            android:orientation="horizontal">
-
             <TextView
                 android:id="@+id/editTime"
                 android:layout_width="wrap_content"
@@ -134,6 +106,7 @@
                 android:layout_weight="1"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
+                android:text="TextView"
                 android:textAlignment="center" />
         </LinearLayout>
 
