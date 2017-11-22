@@ -28,7 +28,7 @@ import java.util.Map;
 public class MainActivity extends NoteActivity {
     public static final String EXTRA_INFO = "com.chickendinner.keep.MESSAGE";
 
-//    private TextView mTextMessage;
+    //    private TextView mTextMessage;
     private Toolbar mToolbar;
 
     private RecyclerView mRecyclerView;
@@ -69,7 +69,7 @@ public class MainActivity extends NoteActivity {
                     }
             );
         }
-            Log.e("data size => ", mDataset.size() + "");
+        Log.e("data size => ", mDataset.size() + "");
     }
 
     public void setPreviewData(Map<String, Object> notes) {
