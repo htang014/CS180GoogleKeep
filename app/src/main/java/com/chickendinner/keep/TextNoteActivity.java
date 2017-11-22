@@ -2,8 +2,13 @@ package com.chickendinner.keep;
 
 import java.lang.ref.SoftReference;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -13,8 +18,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.chickendinner.keep.recycler.CheckListBean;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class TextNoteActivity extends NoteActivity implements View.OnFocusChangeListener {
     private EditText mTextNoteTitle;
@@ -38,7 +47,31 @@ public class TextNoteActivity extends NoteActivity implements View.OnFocusChange
         mTextNoteBody = (EditText) findViewById(R.id.textNoteBody);
         mTextNoteTitle.setOnFocusChangeListener(this);
         mTextNoteBody.setOnFocusChangeListener(this);
-        noteId = "000000000000000000";
+        Intent i = getIntent();
+        if (i != null && i.getStringExtra("noteId") != null) {
+            EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+            mNoteTitle.setText(i.getStringExtra("title"));
+            noteId = i.getStringExtra("noteId");
+            mReference.child(noteId).child("data").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    setSavedData((String) dataSnapshot.getValue());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        } else {
+            noteId = mNoteIdGenerator.generateNoteId();
+        }
+    }
+
+    protected void setSavedData(String data) {
+        String savedtext = data;
+        mTextNoteBody.setText(data);
+
     }
 
     @Override
@@ -61,11 +94,11 @@ public class TextNoteActivity extends NoteActivity implements View.OnFocusChange
             String saveText;
             if (view == mTextNoteTitle) {
                 saveText = mTextNoteTitle.getText().toString();
-                mReference.child(noteId).child("title").setValue(saveText);
+                mReference.child(noteId).child("title").setValue(saveText.trim());
             }
             if (view == mTextNoteBody) {
                 saveText = mTextNoteBody.getText().toString();
-                mReference.child(noteId).child("data").setValue(saveText);
+                mReference.child(noteId).child("data").setValue(saveText.trim());
             }
             mReference.child(noteId).child("type").setValue("0");
         }
