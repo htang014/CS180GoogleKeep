@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -25,6 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -32,7 +34,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 
 
 public class PhotoNoteActivity extends NoteActivity implements View.OnClickListener, View.OnFocusChangeListener
@@ -47,6 +48,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
 
     private String mCurrentPhotoPath;
     private String mResultPhotoPath;
+    private String StringBitmap;
 
     //requestCode
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -115,14 +117,15 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(data, bmOptions);
+        //Bitmap bitmap = BitmapFactory.decodeFile(data, bmOptions);
+        Bitmap bitmap = convertStringToIcon(data);
         mImageView.setImageBitmap(bitmap);
     }
 
     //Todo add database part here
     protected void saveDataToDB() {
         EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
-        String data = mCurrentPhotoPath;
+        String data = StringBitmap;
         mReference.child(noteId).child("type").setValue("3");
         mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
         mReference.child(noteId).child("data").setValue(data);
@@ -221,6 +224,7 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                     bmOptions.inPurgeable = true;
 
                     Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+                    StringBitmap = convertIconToString(bitmap);
 
                     String savedFile = saveImage(bitmap, 100);
                     mResultPhotoPath = savedFile;
@@ -288,7 +292,8 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
         context.sendBroadcast(scanIntent);
     }
 
-    public void requestAllPower() {
+    public void requestAllPower()
+    {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -299,6 +304,32 @@ public class PhotoNoteActivity extends NoteActivity implements View.OnClickListe
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             }
+        }
+    }
+    public static String convertIconToString(Bitmap bitmap)
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] appicon = baos.toByteArray();
+        return Base64.encodeToString(appicon, Base64.DEFAULT);
+
+    }
+
+    public static Bitmap convertStringToIcon(String st)
+    {
+        Bitmap bitmap = null;
+        try
+        {
+            byte[] bitmapArray;
+            bitmapArray = Base64.decode(st, Base64.DEFAULT);
+            bitmap =
+                    BitmapFactory.decodeByteArray(bitmapArray, 0,
+                            bitmapArray.length);
+            return bitmap;
+        }
+        catch (Exception e)
+        {
+            return null;
         }
     }
 }
