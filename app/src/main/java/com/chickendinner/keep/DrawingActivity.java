@@ -3,6 +3,7 @@ package com.chickendinner.keep;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -21,7 +24,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.Manifest;
 
+import com.chickendinner.keep.recycler.CheckListBean;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -32,6 +37,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class DrawingActivity extends NoteActivity implements View.OnClickListener,View.OnFocusChangeListener, PaletteView.Callback,Handler.Callback {
 
@@ -47,6 +53,7 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
     private Handler mHandler;
     private EditText mTextNoteTitle;
     private String noteId;
+    private String savedFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,32 +162,6 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         return null;
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.save:
-//                if (mSaveProgressDlg == null) {
-//                    initSaveProgressDlg();
-//                }
-//                mSaveProgressDlg.show();
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Bitmap bm = mPaletteView.buildBitmap();
-//                        String savedFile = saveImage(bm, 100);
-//                        if (savedFile != null) {
-//                            scanFile(DrawingActivity.this, savedFile);
-//                            mHandler.obtainMessage(MSG_SAVE_SUCCESS).sendToTarget();
-//                        } else {
-//                            mHandler.obtainMessage(MSG_SAVE_FAILED).sendToTarget();
-//                        }
-//                    }
-//                }).start();
-//                break;
-//        }
-//        return true;
-//    }
-
     @Override
     public void onUndoRedoStatusChanged() {
         mUndoView.setEnabled(mPaletteView.canUndo());
@@ -196,6 +177,28 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                 mReference.child(noteId).child("title").setValue(saveText);
             }
         }
+    }
+
+    public void requestAllPower() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            }
+        }
+    }
+
+    protected void saveDataToDB() {
+        EditText mNoteTitle = (EditText) findViewById(R.id.textNoteTitle);
+        String data = savedFile;
+        mReference.child(noteId).child("type").setValue("3");
+        mReference.child(noteId).child("title").setValue(mNoteTitle.getText().toString());
+        mReference.child(noteId).child("data").setValue(data);
     }
 
     @Override
@@ -222,9 +225,11 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                 mPaletteView.clear();
                 break;
             case R.id.backButton:
+                saveDataToDB();
                 finish();
                 break;
             case R.id.saveButton:
+                requestAllPower();
                 if (mSaveProgressDlg == null) {
                     initSaveProgressDlg();
                 }
@@ -233,7 +238,7 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                     @Override
                     public void run() {
                         Bitmap bm = mPaletteView.buildBitmap();
-                        String savedFile = saveImage(bm, 100);
+                        savedFile = saveImage(bm, 100);
                         if (savedFile != null) {
                             scanFile(DrawingActivity.this, savedFile);
                             mHandler.obtainMessage(MSG_SAVE_SUCCESS).sendToTarget();
@@ -242,6 +247,8 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                         }
                     }
                 }).start();
+                break;
+            case R.id.textNoteTitle:
                 break;
         }
     }
