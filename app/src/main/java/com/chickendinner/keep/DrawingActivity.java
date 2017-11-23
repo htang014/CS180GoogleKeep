@@ -54,14 +54,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class DrawingActivity extends NoteActivity implements View.OnClickListener,View.OnFocusChangeListener, PaletteView.Callback,Handler.Callback {
+public class DrawingActivity extends NoteActivity implements View.OnClickListener,View.OnFocusChangeListener, DrawView.Callback,Handler.Callback {
 
     private View mUndoView;
     private View mRedoView;
     private View mPenView;
     private View mEraserView;
     private View mClearView;
-    private PaletteView mPaletteView;
+    private DrawView mDrawView;
     private ProgressDialog mSaveProgressDlg;
     private static final int MSG_SAVE_SUCCESS = 1;
     private static final int MSG_SAVE_FAILED = 2;
@@ -80,8 +80,8 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         cal = Calendar.getInstance();
         updateTime();
 
-        mPaletteView = (PaletteView) findViewById(R.id.palette);
-        mPaletteView.setCallback(this);
+        mDrawView = (DrawView) findViewById(R.id.palette);
+        mDrawView.setCallback(this);
 
         mUndoView = findViewById(R.id.undo);
         mRedoView = findViewById(R.id.redo);
@@ -125,13 +125,6 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mHandler.removeMessages(MSG_SAVE_FAILED);
-        mHandler.removeMessages(MSG_SAVE_SUCCESS);
-    }
-
     private void initSaveProgressDlg() {
         mSaveProgressDlg = new ProgressDialog(this);
         mSaveProgressDlg.setMessage("saving, please wait...");
@@ -153,48 +146,10 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         return true;
     }
 
-    private static void scanFile(Context context, String filePath) {
-        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        scanIntent.setData(Uri.fromFile(new File(filePath)));
-        context.sendBroadcast(scanIntent);
-    }
-
-    private static String saveImage(Bitmap bmp, int quality) {
-        if (bmp == null) {
-            return null;
-        }
-        File appDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        if (appDir == null) {
-            return null;
-        }
-        String fileName = System.currentTimeMillis() + ".jpg";
-        File file = new File(appDir, fileName);
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(file);
-            bmp.compress(Bitmap.CompressFormat.JPEG, quality, fos);
-            fos.flush();
-            return file.getAbsolutePath();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public void onUndoRedoStatusChanged() {
-        mUndoView.setEnabled(mPaletteView.canUndo());
-        mRedoView.setEnabled(mPaletteView.canRedo());
+        mUndoView.setEnabled(mDrawView.canUndo());
+        mRedoView.setEnabled(mDrawView.canRedo());
     }
 
     @Override
@@ -235,23 +190,23 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         clearAllFocus();
         switch (v.getId()) {
             case R.id.undo:
-                mPaletteView.undo();
+                mDrawView.undo();
                 break;
             case R.id.redo:
-                mPaletteView.redo();
+                mDrawView.redo();
                 break;
             case R.id.pen:
                 v.setSelected(true);
                 mEraserView.setSelected(false);
-                mPaletteView.setMode(PaletteView.Mode.DRAW);
+                mDrawView.setMode(DrawView.Mode.DRAW);
                 break;
             case R.id.eraser:
                 v.setSelected(true);
                 mPenView.setSelected(false);
-                mPaletteView.setMode(PaletteView.Mode.ERASER);
+                mDrawView.setMode(DrawView.Mode.ERASER);
                 break;
             case R.id.clear:
-                mPaletteView.clear();
+                mDrawView.clear();
                 break;
             case R.id.backButton:
                 saveDataToDB();
@@ -266,15 +221,8 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Bitmap bm = mPaletteView.buildBitmap();
+                        Bitmap bm = mDrawView.buildBitmap();
                         uploadPic(bm);
-                        /*savedFile = saveImage(bm, 100);
-                        if (savedFile != null) {
-                            scanFile(DrawingActivity.this, savedFile);
-                            mHandler.obtainMessage(MSG_SAVE_SUCCESS).sendToTarget();
-                        } else {
-                            mHandler.obtainMessage(MSG_SAVE_FAILED).sendToTarget();
-                        }*/
                     }
                 }).start();
                 break;

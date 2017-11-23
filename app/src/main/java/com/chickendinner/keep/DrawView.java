@@ -1,104 +1,248 @@
 package com.chickendinner.keep;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.os.Environment;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DrawView extends View {
-    private Bitmap cacheBitmap;// 画纸
-    private Canvas cacheCanvas;// 创建画布、画家
-    private Path path;// 绘图的路径
-    public Paint paint;// 画笔
-    private float preX, preY;// 之前的XY的位置，用于下面的手势移动
-    private int view_width, view_height;// 屏幕的高度与宽度
+
+    private Paint mPaint;
+    private Path mPath;
+    private float mLastX;
+    private float mLastY;
+    private Bitmap mBufferBitmap;
+    private Canvas mBufferCanvas;
+
+    private static final int MAX_CACHE_STEP = 20;
+
+    private List<DrawingInfo> mDrawingList;
+    private List<DrawingInfo> mRemovedList;
+
+    private Xfermode mClearMode;
+    private float mDrawSize;
+    private float mEraserSize;
+
+    private boolean mCanEraser;
+
+    private Callback mCallback;
+
+    public enum Mode {
+        DRAW,
+        ERASER
+    }
+
+    private Mode mMode = Mode.DRAW;
+
+    public DrawView(Context context) {
+        this(context,null);
+    }
 
     public DrawView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        path = new Path();
-        paint = new Paint();
-        cacheCanvas = new Canvas();
-        // 获取屏幕的高度与宽度
-        view_width = context.getResources().getDisplayMetrics().widthPixels;
-        view_height = context.getResources().getDisplayMetrics().heightPixels;
-        cacheBitmap = Bitmap.createBitmap(view_width, view_height,
-                Config.ARGB_8888);// 建立图像缓冲区用来保存图像
-        cacheCanvas.setBitmap(cacheBitmap);
-        cacheCanvas.drawColor(Color.WHITE);
-        paint.setColor(Color.BLACK);// 设置画笔的默认颜色
-        paint.setStyle(Paint.Style.STROKE);// 设置画笔的填充方式为无填充、仅仅是画线
-        paint.setStrokeWidth(1);// 设置画笔的宽度为1
+        setDrawingCacheEnabled(true);
+        init();
+    }
 
+    public interface Callback {
+        void onUndoRedoStatusChanged();
+    }
+
+    public void setCallback(Callback callback){
+        mCallback = callback;
+    }
+
+    private void init() {
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setFilterBitmap(true);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mDrawSize = 20;
+        mEraserSize = 40;
+        mPaint.setStrokeWidth(mDrawSize);
+        mPaint.setColor(0XFF000000);
+
+        mClearMode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
+    }
+
+    private void initBuffer(){
+        mBufferBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        mBufferCanvas = new Canvas(mBufferBitmap);
+    }
+
+    private abstract static class DrawingInfo {
+        Paint paint;
+        abstract void draw(Canvas canvas);
+    }
+
+    private static class PathDrawingInfo extends DrawingInfo{
+
+        Path path;
+
+        @Override
+        void draw(Canvas canvas) {
+            canvas.drawPath(path, paint);
+        }
+    }
+
+
+    public void setMode(Mode mode) {
+        if (mode != mMode) {
+            mMode = mode;
+            if (mMode == Mode.DRAW) {
+                mPaint.setXfermode(null);
+                mPaint.setStrokeWidth(mDrawSize);
+            } else {
+                mPaint.setXfermode(mClearMode);
+                mPaint.setStrokeWidth(mEraserSize);
+            }
+        }
+    }
+
+    private void reDraw(){
+        if (mDrawingList != null) {
+            mBufferBitmap.eraseColor(Color.TRANSPARENT);
+            for (DrawingInfo drawingInfo : mDrawingList) {
+                drawingInfo.draw(mBufferCanvas);
+            }
+            invalidate();
+        }
+    }
+
+    public boolean canRedo() {
+        return mRemovedList != null && mRemovedList.size() > 0;
+    }
+
+    public boolean canUndo(){
+        return mDrawingList != null && mDrawingList.size() > 0;
+    }
+
+    public void redo() {
+        int size = mRemovedList == null ? 0 : mRemovedList.size();
+        if (size > 0) {
+            DrawingInfo info = mRemovedList.remove(size - 1);
+            mDrawingList.add(info);
+            mCanEraser = true;
+            reDraw();
+            if (mCallback != null) {
+                mCallback.onUndoRedoStatusChanged();
+            }
+        }
+    }
+
+    public void undo() {
+        int size = mDrawingList == null ? 0 : mDrawingList.size();
+        if (size > 0) {
+            DrawingInfo info = mDrawingList.remove(size - 1);
+            if (mRemovedList == null) {
+                mRemovedList = new ArrayList<>(MAX_CACHE_STEP);
+            }
+            if (size == 1) {
+                mCanEraser = false;
+            }
+            mRemovedList.add(info);
+            reDraw();
+            if (mCallback != null) {
+                mCallback.onUndoRedoStatusChanged();
+            }
+        }
+    }
+
+    public void clear() {
+        if (mBufferBitmap != null) {
+            if (mDrawingList != null) {
+                mDrawingList.clear();
+            }
+            if (mRemovedList != null) {
+                mRemovedList.clear();
+            }
+            mCanEraser = false;
+            mBufferBitmap.eraseColor(Color.TRANSPARENT);
+            invalidate();
+            if (mCallback != null) {
+                mCallback.onUndoRedoStatusChanged();
+            }
+        }
+    }
+
+    public Bitmap buildBitmap() {
+        Bitmap bm = getDrawingCache();
+        Bitmap result = Bitmap.createBitmap(bm);
+        destroyDrawingCache();
+        return result;
+    }
+
+    private void saveDrawingPath(){
+        if (mDrawingList == null) {
+            mDrawingList = new ArrayList<>(MAX_CACHE_STEP);
+        } else if (mDrawingList.size() == MAX_CACHE_STEP) {
+            mDrawingList.remove(0);
+        }
+        Path cachePath = new Path(mPath);
+        Paint cachePaint = new Paint(mPaint);
+        PathDrawingInfo info = new PathDrawingInfo();
+        info.path = cachePath;
+        info.paint = cachePaint;
+        mDrawingList.add(info);
+        mCanEraser = true;
+        if (mCallback != null) {
+            mCallback.onUndoRedoStatusChanged();
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        canvas.drawBitmap(cacheBitmap, 0, 0, paint);// 把cacheBitmap画到DrawView上
+        if (mBufferBitmap != null) {
+            canvas.drawBitmap(mBufferBitmap, 0, 0, null);
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        // 获取触摸位置
-        float x = event.getX();
-        float y = event.getY();
-        switch (event.getAction()) {// 获取触摸的各个瞬间
-            case MotionEvent.ACTION_DOWN:// 手势按下
-                path.moveTo(x, y);// 绘图的起始点
-                preX = x;
-                preY = y;
+        final int action = event.getAction() & MotionEvent.ACTION_MASK;
+        final float x = event.getX();
+        final float y = event.getY();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mLastX = x;
+                mLastY = y;
+                if (mPath == null) {
+                    mPath = new Path();
+                }
+                mPath.moveTo(x,y);
                 break;
             case MotionEvent.ACTION_MOVE:
-                float dx = Math.abs(x - preX);
-                float dy = Math.abs(y - preY);
-                if (dx > 5 || dy > 5) {// 用户要移动超过5像素才算是画图，免得手滑、手抖现象
-                    path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
-                    preX = x;
-                    preY = y;
-                    cacheCanvas.drawPath(path, paint);// 绘制路径
+                mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
+                if (mBufferBitmap == null) {
+                    initBuffer();
                 }
+                if (mMode == Mode.ERASER && !mCanEraser) {
+                    break;
+                }
+                mBufferCanvas.drawPath(mPath,mPaint);
+                invalidate();
+                mLastX = x;
+                mLastY = y;
                 break;
             case MotionEvent.ACTION_UP:
-                path.reset();
+                if (mMode == Mode.DRAW || mCanEraser) {
+                    saveDrawingPath();
+                }
+                mPath.reset();
                 break;
         }
-        invalidate();
         return true;
     }
-
-    public void saveBitmap() throws Exception {
-
-        String sdpath = Environment.getExternalStorageDirectory()
-                .getAbsolutePath();// 获取sdcard的根路径
-        String filename = new SimpleDateFormat("yyyyMMddhhmmss",
-                Locale.getDefault())
-                .format(new Date(System.currentTimeMillis()));// 产生时间戳，称为文件名
-        File file = new File(sdpath + File.separator + filename + ".png");
-        file.createNewFile();
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        cacheBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);// 以100%的品质创建png
-        // 人走带门
-        fileOutputStream.flush();
-        fileOutputStream.close();
-        Toast.makeText(getContext(),
-                "图像已保存到" + sdpath + File.separator + filename + ".png",
-                Toast.LENGTH_SHORT).show();
-
-    }
-
 }
