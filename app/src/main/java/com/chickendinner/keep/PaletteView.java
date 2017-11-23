@@ -243,7 +243,6 @@ public class PaletteView extends View {
                 mPath.moveTo(x,y);
                 break;
             case MotionEvent.ACTION_MOVE:
-                //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
                 mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
                 if (mBufferBitmap == null) {
                     initBuffer();
