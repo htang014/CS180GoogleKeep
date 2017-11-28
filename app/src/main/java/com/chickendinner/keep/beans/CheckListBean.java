@@ -1,10 +1,10 @@
-package com.chickendinner.keep.recycler;
+package com.chickendinner.keep.beans;
 
 import java.io.Serializable;
 
 public class CheckListBean implements Serializable {
-    String text;
-    boolean check;
+    private String text;
+    private boolean check;
 
     public boolean isCheck() {
         return check;

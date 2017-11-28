@@ -2,10 +2,7 @@ package com.chickendinner.keep;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -14,35 +11,24 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.view.View;
-import android.widget.Toast;
 
-import com.chickendinner.keep.prevew.PreviewListBean;
-import com.chickendinner.keep.recycler.CheckListBean;
+import com.chickendinner.keep.beans.NoteItemBean;
+import com.chickendinner.keep.beans.PreviewListBean;
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class MainActivity extends NoteActivity {
-    public static final String EXTRA_KEY = "com.chickendinner.keep.KEY";
-    public static final String EXTRA_INFO = "com.chickendinner.keep.MESSAGE";
-    public static final String EXTRA_TITLE = "com.chickendinner.keep.TITLE";
-    /*public static final String EXTRA_DATA = "com.chickendinner.keep.DATA";
-    public static final String EXTRA_LIST = "com.chickendinner.keep.LIST";*/
     private static final String TAG = "MainActivity";
-
-    /*public Vector<String> title;
-    public Vector<String> data;
-    public Vector<List<CheckListBean>> listData;*/
-    //public Vector<String> type;
+    public static final String EXTRA_KEY = "com.chickendinner.keep.KEY";
+    public static final String EXTRA_TITLE = "com.chickendinner.keep.TITLE";
 
     //private TextView mTextMessage;
     private Toolbar mToolbar;
@@ -50,7 +36,6 @@ public class MainActivity extends NoteActivity {
     private FirebaseListAdapter mAdapter;
 
     // Items in Firebase-stored note
-
     List<PreviewListBean> mDataset = new ArrayList<>();;
 
     @Override
@@ -58,16 +43,16 @@ public class MainActivity extends NoteActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*title = new Vector<String>(0);
-        data = new Vector<String>(0);
-        listData = new Vector<List<CheckListBean>>(0);*/
-        //type = new Vector<String>(0);
-
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-        signInWithGoogle();
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
 
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getUid();
         if(uid!=null) {
@@ -82,17 +67,12 @@ public class MainActivity extends NoteActivity {
         super.onStart();
 
         mListView = (ListView) findViewById(R.id.preview);
-        mAdapter =  new FirebaseListAdapter<NoteItemContainer>(this,
-                NoteItemContainer.class,android.R.layout.simple_list_item_1, mReference) {
+        mAdapter =  new FirebaseListAdapter<NoteItemBean>(this,
+                NoteItemBean.class,android.R.layout.simple_list_item_1, mReference) {
             @Override
-            protected void populateView(View view, NoteItemContainer mContainer, int position) {
+            protected void populateView(View view, NoteItemBean mContainer, int position) {
                 ((TextView)view.findViewById(android.R.id.text1)).setText(mContainer.getTitle());
-                /*title.addElement(mContainer.getTitle());
-                data.addElement(mContainer.getData());
-                listData.addElement(mContainer.getListData());*/
                 ((TextView)view.findViewById(android.R.id.text1)).setTag(mContainer.getType());
-                //type.addElement(mContainer.getType());
-                //((TextView)view.findViewById(android.R.id.text2)).setText("" + receiptItem.getExpiration() + " days left");
             }
         };
         mListView.setAdapter(mAdapter);
@@ -123,8 +103,6 @@ public class MainActivity extends NoteActivity {
 
                 intent.putExtra(EXTRA_KEY, mAdapter.getRef(position).getKey());
                 intent.putExtra(EXTRA_TITLE, (String) ((TextView)v).getText());
-                /*intent.putExtra(EXTRA_DATA, data.elementAt(position));
-                intent.putExtra(EXTRA_LIST, (Serializable)listData.elementAt(position));*/
                 startActivity(intent);
             }
         });
@@ -176,21 +154,21 @@ public class MainActivity extends NoteActivity {
 
         intent.putExtra(EXTRA_KEY, "");
         intent.putExtra(EXTRA_TITLE, "");
-        //intent.putExtra(EXTRA_DATA, "");
-        //intent.putExtra(EXTRA_LIST, "");
         startActivity(intent);
     }
 
     private void signOutWithGoogle() {
         uid = null;
-        Intent intent = new Intent(this, SignInActivity.class);
-        intent.putExtra(EXTRA_INFO, "sign_out");
-        startActivity(intent);
-    }
+        // Firebase sign out
+        mAuth.signOut();
 
-    private void signInWithGoogle(){
-        Intent intent = new Intent(this, SignInActivity.class);
-        intent.putExtra(EXTRA_INFO, "sign_in");
-        startActivity(intent);
+        // Google sign out
+        mGoogleSignInClient.signOut().addOnCompleteListener(this,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        finish();
+                    }
+                });
     }
 }

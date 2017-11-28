@@ -57,12 +57,14 @@
                 android:orientation="vertical">
 
                 <EditText
-                    android:id="@+id/textNoteTitle"
+                    android:id="@+id/noteTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.1"
                     android:background="@android:color/transparent"
                     android:ems="10"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:hint="Title"
                     android:inputType="textMultiLine|textPersonName"
                     android:onClick="onClick"
@@ -72,13 +74,11 @@
                     android:paddingTop="20dp"
                     android:scrollHorizontally="false"
                     android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"/>
+                    android:textStyle="bold" />
 
                 <fragment
                     android:id="@+id/checklistFragment"
-                    android:name="com.chickendinner.keep.recycler.RecyclerListFragment"
+                    android:name="com.chickendinner.keep.fragments.ChecklistFragment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:onClick="onClick"

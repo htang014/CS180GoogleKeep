@@ -59,12 +59,14 @@
                 android:orientation="vertical">
 
                 <EditText
-                    android:id="@+id/textNoteTitle"
+                    android:id="@+id/noteTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.1"
                     android:background="@android:color/transparent"
                     android:ems="10"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:hint="Title"
                     android:inputType="textMultiLine|textPersonName"
                     android:onClick="onClick"
@@ -74,27 +76,15 @@
                     android:paddingTop="20dp"
                     android:scrollHorizontally="false"
                     android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"/>
+                    android:textStyle="bold" />
 
-                <EditText
-                    android:id="@+id/textNoteBody"
+                <fragment
+                    android:id="@+id/textNoteFragment"
+                    android:name="com.chickendinner.keep.fragments.TextNoteFragment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.1"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:gravity="top|center_vertical"
-                    android:hint="Note"
-                    android:inputType="text|textMultiLine"
-                    android:onClick="onClick"
-                    android:paddingBottom="20dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:scrollHorizontally="false"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"/>
+                    android:layout_weight="0.1" />
+
             </LinearLayout>
         </ScrollView>
 

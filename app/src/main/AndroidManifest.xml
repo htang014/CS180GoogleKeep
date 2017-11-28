@@ -17,14 +17,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:name=".SignInActivity"
+            android:label="Sign In"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" />
         <activity
             android:name=".TextNoteActivity"
             android:label="@string/title_activity_text_note"
@@ -45,7 +50,6 @@
             android:label="@string/title_activity_photo_note"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".SignInActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

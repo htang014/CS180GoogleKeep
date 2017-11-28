@@ -1,6 +1,5 @@
-package com.chickendinner.keep.recycler;
+package com.chickendinner.keep.fragments;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,32 +9,25 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.chickendinner.keep.R;
-import com.chickendinner.keep.recycler.RecyclerListAdapter;
+import com.chickendinner.keep.beans.CheckListBean;
+import com.chickendinner.keep.tools.OnTextChangeListener;
+import com.chickendinner.keep.adapters.RecyclerListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecyclerListFragment extends Fragment {
+public class ChecklistFragment extends NoteFragment {
     private RecyclerView mRecyclerView;
     private RecyclerListAdapter mRecyclerAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private List<CheckListBean> mDataset;
-
-    public List<CheckListBean> getmDataset() {
-        return mDataset;
-    }
-
-    public void setmDataset(List<CheckListBean> mDataset) {
-        this.mDataset = mDataset;
-        mRecyclerAdapter.notifyDataSetChanged();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mDataset = new ArrayList<>();
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recycler_list, container, false);
+        return inflater.inflate(R.layout.fragment_checklist, container, false);
     }
 
     @Override
@@ -46,13 +38,14 @@ public class RecyclerListFragment extends Fragment {
         mRecyclerAdapter.setOnTextChangeListener(new OnTextChangeListener() {
             @Override
             public void onTextChanged(int pos, String text) {
-                mDataset.get(pos).text = text;
+                mDataset.get(pos).setText(text);
+                onChangeListener.onFragmentChanged();
                 Log.e(String.format("%d is ---->",pos),text);
             }
 
             @Override
             public void onCheckChanged(int pos, boolean check) {
-                mDataset.get(pos).check = check;
+                mDataset.get(pos).setCheck(check);
             }
         });
         mRecyclerView.setAdapter(mRecyclerAdapter);
@@ -61,7 +54,11 @@ public class RecyclerListFragment extends Fragment {
 
     }
 
-    // Externally used to push to RecyclerView
+    // Functions for external use
+    public List<CheckListBean> getDataset() {
+        return mDataset;
+    }
+
     public void addItem() {
         mDataset.add(new CheckListBean("", false));
         mRecyclerAdapter.notifyDataSetChanged();

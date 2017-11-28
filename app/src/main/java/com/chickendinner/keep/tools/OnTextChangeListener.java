@@ -1,4 +1,4 @@
-package com.chickendinner.keep.recycler;
+package com.chickendinner.keep.tools;
 
 public interface OnTextChangeListener {
     void onTextChanged(int pos, String text);

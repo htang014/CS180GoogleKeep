@@ -22,7 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 public class SignInActivity extends AppCompatActivity implements View.OnClickListener{
-    private static final String TAG = "GoogleActivity";
+    private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private FirebaseAuth mAuth;
@@ -48,12 +48,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onStart() {
         super.onStart();
-
-        Intent intent = getIntent();
-        String mode = intent.getStringExtra(MainActivity.EXTRA_INFO);
-        if (mode.equals("sign_out")){
-            signOut();
-        }
 
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -133,7 +127,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     protected void updateUI (FirebaseUser account){
         if (account != null) {
-            finish();
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            //finish();
         }
     }
 

@@ -1,67 +1,43 @@
 package com.chickendinner.keep;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.graphics.Palette;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.chickendinner.keep.recycler.CheckListBean;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.chickendinner.keep.fragments.DrawingFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
-public class DrawingActivity extends NoteActivity implements View.OnClickListener,View.OnFocusChangeListener, DrawView.Callback,Handler.Callback {
+public class DrawingActivity extends NoteActivity implements View.OnClickListener,View.OnFocusChangeListener, DrawingFragment.Callback,Handler.Callback {
+    private static final String TAG = "DrawingActivity";
 
     private View mUndoView;
     private View mRedoView;
     private View mPenView;
     private View mEraserView;
     private View mClearView;
-    private DrawView mDrawView;
+    private DrawingFragment mDrawingFragment;
     private ProgressDialog mSaveProgressDlg;
     private static final int MSG_SAVE_SUCCESS = 1;
     private static final int MSG_SAVE_FAILED = 2;
@@ -76,12 +52,12 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawing);
-        mEditTime = (TextView) findViewById(R.id.editTime);
+        mEditTimeView = (TextView) findViewById(R.id.editTime);
         cal = Calendar.getInstance();
         updateTime();
 
-        mDrawView = (DrawView) findViewById(R.id.palette);
-        mDrawView.setCallback(this);
+        mDrawingFragment = (DrawingFragment) findViewById(R.id.palette);
+        mDrawingFragment.setCallback(this);
 
         mUndoView = findViewById(R.id.undo);
         mRedoView = findViewById(R.id.redo);
@@ -148,8 +124,8 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
 
     @Override
     public void onUndoRedoStatusChanged() {
-        mUndoView.setEnabled(mDrawView.canUndo());
-        mRedoView.setEnabled(mDrawView.canRedo());
+        mUndoView.setEnabled(mDrawingFragment.canUndo());
+        mRedoView.setEnabled(mDrawingFragment.canRedo());
     }
 
     @Override
@@ -190,23 +166,23 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
         clearAllFocus();
         switch (v.getId()) {
             case R.id.undo:
-                mDrawView.undo();
+                mDrawingFragment.undo();
                 break;
             case R.id.redo:
-                mDrawView.redo();
+                mDrawingFragment.redo();
                 break;
             case R.id.pen:
                 v.setSelected(true);
                 mEraserView.setSelected(false);
-                mDrawView.setMode(DrawView.Mode.DRAW);
+                mDrawingFragment.setMode(DrawingFragment.Mode.DRAW);
                 break;
             case R.id.eraser:
                 v.setSelected(true);
                 mPenView.setSelected(false);
-                mDrawView.setMode(DrawView.Mode.ERASER);
+                mDrawingFragment.setMode(DrawingFragment.Mode.ERASER);
                 break;
             case R.id.clear:
-                mDrawView.clear();
+                mDrawingFragment.clear();
                 break;
             case R.id.backButton:
                 saveDataToDB();
@@ -221,7 +197,7 @@ public class DrawingActivity extends NoteActivity implements View.OnClickListene
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Bitmap bm = mDrawView.buildBitmap();
+                        Bitmap bm = mDrawingFragment.buildBitmap();
                         uploadPic(bm);
                     }
                 }).start();

@@ -1,4 +1,4 @@
-package com.chickendinner.keep;
+package com.chickendinner.keep.fragments;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -16,7 +16,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawView extends View {
+public class DrawingFragment extends View {
 
     private Paint mPaint;
     private Path mPath;
@@ -45,11 +45,11 @@ public class DrawView extends View {
 
     private Mode mMode = Mode.DRAW;
 
-    public DrawView(Context context) {
+    public DrawingFragment(Context context) {
         this(context,null);
     }
 
-    public DrawView(Context context, AttributeSet attrs) {
+    public DrawingFragment(Context context, AttributeSet attrs) {
         super(context, attrs);
         setDrawingCacheEnabled(true);
         init();

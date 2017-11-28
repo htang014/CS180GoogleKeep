@@ -1,12 +1,9 @@
-package com.chickendinner.keep.recycler;
+package com.chickendinner.keep.adapters;
 
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -15,8 +12,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.chickendinner.keep.R;
+import com.chickendinner.keep.beans.CheckListBean;
+import com.chickendinner.keep.tools.OnTextChangeListener;
 
-import java.util.Collections;
 import java.util.List;
 
 public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapter.ViewHolder> {
@@ -63,7 +61,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         // Initialize EditText contents to string added to dataset.  Does nothing currently.
 
         EditText t = (EditText) holder.mChecklistItem.getChildAt(2);
-        t.setText(mDataset.get(position).text);
+        t.setText(mDataset.get(position).getText());
         t.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -82,7 +80,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListAdapte
         });
         CheckBox cb = (CheckBox) holder.mChecklistItem.getChildAt(1);
         cb.setOnCheckedChangeListener(null);
-        cb.setChecked(mDataset.get(position).check);
+        cb.setChecked(mDataset.get(position).isCheck());
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {

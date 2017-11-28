@@ -1,4 +1,4 @@
-package com.chickendinner.keep.prevew;
+package com.chickendinner.keep.beans;
 
 public class PreviewListBean {
     String noteId;
